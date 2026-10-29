@@ -9,6 +9,8 @@ function env(name: string, fallback?: string): string {
 
 export const config = {
   rpcUrl: env('RPC_URL', 'https://test-evm-rpc-v3.portaldot.dev'),
+  // Substrate JSON-RPC over HTTP; used to list every contract account.
+  substrateUrl: env('SUBSTRATE_RPC_URL', 'https://test-node-v3.portaldot.dev'),
   chainId: Number(env('CHAIN_ID', '420420777')),
   dataDir: resolve(env('DATA_DIR', 'data')),
   port: Number(env('PORT', '8787')),

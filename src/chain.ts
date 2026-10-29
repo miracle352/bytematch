@@ -17,6 +17,8 @@ export interface Creation {
 
 type Hex = string;
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export class RpcError extends Error {
   constructor(public method: string, public code: number | undefined, message: string) {
     super(`${method}: ${message}`);
@@ -31,24 +33,30 @@ export class Chain {
   async rpc<T>(method: string, params: unknown[]): Promise<T> {
     const body = JSON.stringify({ jsonrpc: '2.0', id: this.nextId++, method, params });
     let lastErr: unknown;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    // The public node answers 503/429 under load; back off 0.4, 0.8, 1.6, 3.2s.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      let res: Response;
       try {
-        const res = await fetch(this.url, {
+        res = await fetch(this.url, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body,
           signal: AbortSignal.timeout(this.timeoutMs),
         });
-        if (res.status >= 500) throw new RpcError(method, res.status, `HTTP ${res.status}`);
-        const json = (await res.json()) as { result?: T; error?: { code: number; message: string } };
-        if (json.error) throw new RpcError(method, json.error.code, json.error.message);
-        return json.result as T;
       } catch (e) {
-        lastErr = e;
-        // A JSON-RPC error is an answer, not a transport failure; don't retry it.
-        if (e instanceof RpcError && e.code !== undefined && e.code < 500) throw e;
-        await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+        lastErr = e; // network error or timeout: retry
+        await sleep(400 * 2 ** attempt);
+        continue;
       }
+      if (res.status === 429 || res.status >= 500) {
+        lastErr = new RpcError(method, res.status, `HTTP ${res.status}`);
+        await sleep(400 * 2 ** attempt);
+        continue;
+      }
+      const json = (await res.json()) as { result?: T; error?: { code: number; message: string } };
+      // A JSON-RPC error is an answer, not a transport failure; don't retry it.
+      if (json.error) throw new RpcError(method, json.error.code, json.error.message);
+      return json.result as T;
     }
     throw lastErr;
   }

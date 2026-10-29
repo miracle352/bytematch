@@ -6,6 +6,7 @@ import type { ContractRecord } from './store.js';
 import { describeError, normaliseAddress, type Bytematch, type Submission } from './service.js';
 import { VerifyError, type ErrorCode } from './verify.js';
 import { etherscanRoutes } from './etherscan.js';
+import { coverage, type NetworkIndex } from './network.js';
 
 const STATUS: Record<ErrorCode, 400 | 404 | 422> = {
   bad_input: 400,
@@ -62,7 +63,7 @@ function fail(c: Context, e: unknown) {
   return c.json({ error: { code: 'internal', message: describeError(e) } }, 500);
 }
 
-export function createApp(app: Bytematch, info: { registry: string | null }) {
+export function createApp(app: Bytematch, info: { registry: string | null; network?: NetworkIndex }) {
   const api = new Hono();
   api.use('*', cors());
   api.use('*', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
@@ -79,6 +80,20 @@ export function createApp(app: Bytematch, info: { registry: string | null }) {
   });
 
   api.get('/v1/stats', (c) => c.json(app.store.countContracts()));
+
+  // Every contract on the chain with its verification status.
+  // ?status=verified|same-code|unverified filters the list; totals always cover everything.
+  api.get('/v1/network', async (c) => {
+    if (!info.network) return c.json({ error: { code: 'unavailable', message: 'network index disabled' } }, 503);
+    try {
+      const cov = coverage(await info.network.get(), app.store);
+      const status = c.req.query('status');
+      const contracts = status ? cov.contracts.filter((r) => r.status === status) : cov.contracts;
+      return c.json({ ...cov, contracts });
+    } catch (e) {
+      return fail(c, e);
+    }
+  });
 
   api.post('/v1/verify', async (c) => {
     const parsed = verifyBody.safeParse(await c.req.json().catch(() => null));
