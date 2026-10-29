@@ -6,7 +6,7 @@ import { keccak256, toUtf8Bytes } from 'ethers';
 import type { StandardJsonInput } from './compiler.js';
 
 export interface Bundle {
-  schema: 'sourcebound/bundle@1';
+  schema: 'bytematch/bundle@1';
   compiler: string; // solc long version
   contract: string; // "path:Name"
   input: StandardJsonInput;
@@ -27,7 +27,7 @@ export function canonicalJson(value: unknown): string {
 export function makeBundle(compiler: string, contract: string, input: StandardJsonInput): Bundle {
   // Output selection never affects bytecode; leave it out so equivalent inputs digest equally.
   const { outputSelection: _ignored, ...settings } = input.settings ?? {};
-  return { schema: 'sourcebound/bundle@1', compiler, contract, input: { ...input, settings } };
+  return { schema: 'bytematch/bundle@1', compiler, contract, input: { ...input, settings } };
 }
 
 export function bundleDigest(bundle: Bundle): string {

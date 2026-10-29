@@ -66,7 +66,7 @@ async function readDeployed(chain: Chain, address: string): Promise<DeployedInfo
   if (isPolkaVm(code)) {
     throw new VerifyError(
       'polkavm',
-      `${address} runs PolkaVM code (built with resolc). Sourcebound currently verifies EVM bytecode, which is what nearly every contract on Portaldot V3 uses.`,
+      `${address} runs PolkaVM code (built with resolc). Bytematch currently verifies EVM bytecode, which is what nearly every contract on Portaldot V3 uses.`,
     );
   }
   return { code, codeHash: keccak256('0x' + code), auxdata: decodeTrailingAuxdata(code) };

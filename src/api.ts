@@ -3,7 +3,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { z } from 'zod';
 import type { ContractRecord } from './store.js';
-import { describeError, normaliseAddress, type Sourcebound, type Submission } from './service.js';
+import { describeError, normaliseAddress, type Bytematch, type Submission } from './service.js';
 import { VerifyError, type ErrorCode } from './verify.js';
 import { etherscanRoutes } from './etherscan.js';
 
@@ -62,7 +62,7 @@ function fail(c: Context, e: unknown) {
   return c.json({ error: { code: 'internal', message: describeError(e) } }, 500);
 }
 
-export function createApp(app: Sourcebound, info: { registry: string | null }) {
+export function createApp(app: Bytematch, info: { registry: string | null }) {
   const api = new Hono();
   api.use('*', cors());
   api.use('*', bodyLimit({ maxSize: 20 * 1024 * 1024 }));

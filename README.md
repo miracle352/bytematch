@@ -1,4 +1,4 @@
-# Sourcebound
+# Bytematch
 
 Source verification for contracts on Portaldot V3.
 
@@ -9,7 +9,7 @@ against source anywhere: the official explorers index the Substrate side and hav
 contract verification, and there is no Etherscan for this chain.
 
 So when a hackathon README says "deployed at 0x…", nobody can tell whether that code is
-the code in the repo. Sourcebound answers that, and writes the answer on chain where
+the code in the repo. Bytematch answers that, and writes the answer on chain where
 other contracts can read it.
 
 ## What it does
@@ -20,7 +20,7 @@ other contracts can read it.
   executable code; comments, file paths or metadata settings differ).
 - **Finds the deploy transaction by itself.** Portaldot has no contract-creation lookup
   and the public indexers start partway through the chain, but the RPC keeps historical
-  state. Sourcebound searches `eth_getCode` over block heights (8 probes per round, ~3s
+  state. Bytematch searches `eth_getCode` over block heights (8 probes per round, ~3s
   for 250k blocks), then matches the creation input to recover constructor arguments.
 - **Works from just the `.sol` file.** If you don't know your settings, it reads the
   compiler version and metadata type from the deployed bytecode and searches the
@@ -108,7 +108,7 @@ against it yet.
 forge verify-contract <address> src/Vault.sol:Vault \
   --chain 420420777 \
   --verifier etherscan \
-  --verifier-url https://<sourcebound-host>/api \
+  --verifier-url https://<bytematch-host>/api \
   --etherscan-api-key unused
 ```
 
@@ -120,7 +120,7 @@ etherscan: {
   customChains: [{
     network: 'portaldot',
     chainId: 420420777,
-    urls: { apiURL: 'https://<sourcebound-host>/api', browserURL: 'https://<sourcebound-host>' },
+    urls: { apiURL: 'https://<bytematch-host>/api', browserURL: 'https://<bytematch-host>' },
   }],
 },
 ```

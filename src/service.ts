@@ -23,7 +23,7 @@ export interface Lookup {
   record: ContractRecord | null; // for same-code, the record of the contract it shares code with
 }
 
-export class Sourcebound {
+export class Bytematch {
   constructor(
     readonly chain: Chain,
     readonly store: Store,

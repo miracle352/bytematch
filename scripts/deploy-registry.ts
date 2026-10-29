@@ -1,4 +1,4 @@
-// Deploy SourceRegistry, then verify the deployment with Sourcebound's own verifier
+// Deploy SourceRegistry, then verify the deployment with Bytematch's own verifier
 // and record everything in deployments/<network>.json.
 //
 //   ATTESTER_KEY=0x... npm run deploy:registry
@@ -36,7 +36,7 @@ if (receipt?.status !== 1) throw new Error(`deploy failed in ${tx.hash}`);
 const address = (await contract.getAddress()).toLowerCase();
 console.log(`SourceRegistry at ${address}, block ${receipt.blockNumber}`);
 
-// The registry is the first contract Sourcebound verifies.
+// The registry is the first contract Bytematch verifies.
 const v = await verify(new Chain(config.rpcUrl), {
   address,
   input: build.input,

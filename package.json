@@ -1,5 +1,5 @@
 {
-  "name": "sourcebound",
+  "name": "bytematch",
   "version": "0.1.0",
   "private": true,
   "description": "Source verification for contracts on Portaldot V3",

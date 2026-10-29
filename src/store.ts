@@ -43,7 +43,7 @@ export class Store {
 
   constructor(dataDir: string) {
     mkdirSync(dataDir, { recursive: true });
-    this.db = new DatabaseSync(join(dataDir, 'sourcebound.db'));
+    this.db = new DatabaseSync(join(dataDir, 'bytematch.db'));
     this.db.exec(`
       PRAGMA journal_mode = WAL;
       CREATE TABLE IF NOT EXISTS contracts (

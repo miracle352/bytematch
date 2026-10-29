@@ -12,7 +12,7 @@
 
 import { Hono, type Context } from 'hono';
 import type { StandardJsonInput } from './compiler.js';
-import { describeError, type Sourcebound, type Submission } from './service.js';
+import { describeError, type Bytematch, type Submission } from './service.js';
 import { config } from './config.js';
 
 type Params = Record<string, string>;
@@ -59,7 +59,7 @@ function submissionFrom(p: Params): Submission {
   return { kind: 'standard-json', address, input, contract: name, compilerVersion };
 }
 
-export function etherscanRoutes(app: Sourcebound) {
+export function etherscanRoutes(app: Bytematch) {
   const r = new Hono();
 
   const handler = async (c: Context) => {
