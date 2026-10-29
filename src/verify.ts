@@ -1,4 +1,4 @@
-import { keccak256 } from 'ethers';
+import { FunctionFragment, Interface, keccak256 } from 'ethers';
 import type { Chain, Creation } from './chain.js';
 import {
   decodeTrailingAuxdata,
@@ -200,6 +200,27 @@ export async function verifyAuto(chain: Chain, req: AutoRequest, maxAttempts = 4
     { enabled: true, runs: 999999 },
   ];
 
+  // Settings change code layout but never function selectors. If no candidate's selectors
+  // all appear in the deployed code, these sources can't match under any settings.
+  const probe = await compile(version, {
+    language: 'Solidity',
+    sources: req.sources,
+    settings: { evmVersion: defaultEvmVersion(version), metadata: { bytecodeHash } },
+  });
+  const probeErrors = compileErrors(probe);
+  if (probeErrors.length) throw new VerifyError('compile_error', 'the sources did not compile', probeErrors);
+  const plausible = pickCandidates(probe.contracts ?? {}, req.contract).filter((x) =>
+    // The optimizer pushes a selector like 0x00ab12cd as PUSH3 ab12cd, so drop leading zero bytes.
+    selectorsOf(x.c.abi).every((sel) => deployed.code.includes(sel.replace(/^(00)+/, ''))),
+  );
+  if (!plausible.length) {
+    throw new VerifyError(
+      'no_match',
+      'none of the submitted contracts has the functions found in the deployed code, so no compiler settings can make them match',
+    );
+  }
+  const target = req.contract ?? (plausible.length === 1 ? `${plausible[0]!.path}:${plausible[0]!.name}` : undefined);
+
   let tried = 0;
   for (const viaIR of [false, true]) {
     for (const evmVersion of evms) {
@@ -213,7 +234,7 @@ export async function verifyAuto(chain: Chain, req: AutoRequest, maxAttempts = 4
         };
         let result: Verification | null;
         try {
-          result = await attempt(chain, deployed, req.address, version, input, req.contract);
+          result = await attempt(chain, deployed, req.address, version, input, target);
         } catch (e) {
           // A bad evmVersion for this compiler is just a skipped candidate; real source
           // errors surface on the first attempt.
@@ -231,6 +252,15 @@ export async function verifyAuto(chain: Chain, req: AutoRequest, maxAttempts = 4
     'no_match',
     `tried ${tried} common compiler settings and none reproduced the deployed code. Submit your standard JSON input instead.`,
   );
+}
+
+/** 4-byte selectors (hex, no 0x) of the external functions in an ABI. */
+function selectorsOf(abi: unknown[]): string[] {
+  const fns = (abi as Array<{ type: string }>).filter((f) => f.type === 'function');
+  if (!fns.length) return [];
+  return new Interface(abi as never).fragments
+    .filter((f): f is FunctionFragment => f.type === 'function')
+    .map((f) => f.selector.slice(2));
 }
 
 /** Turn a solc metadata.json (as Remix and Hardhat emit) into a standard JSON input. */
