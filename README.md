@@ -47,9 +47,22 @@ with the settings recorded in those repositories:
 | DotProof | Backstop | `0xb57969ce443dbdf2f41e67408a77e5311b548187` | exact, constructor args recovered |
 | DotProof | AgentRegistry | `0x95cced224908a20d7b4a7d684cbc9acd4b0e2177` | exact, 8 constructor args recovered |
 | Allowance | Allowance | `0xdf8567f1fa9f6afbe1c8f99453544c35009ac07f` | partial: same code, metadata differs from the current repo |
+| PortalSwap | PortalSwapFactory | `0xc631805c297c4233b33c30af91245058902c1d18` | exact |
+| PortalSwap | PortalSwapRouter | `0xc17510df29ae5e4c6c2a46ccb03197edd0963f2b` | exact; constructor args are the factory and WPOT above/below |
+| PortalSwap | WPOT | `0xf67ce92096e4e171060b71bf0cca0da9f9548c03` | exact |
+| PortalSwap | MockERC20 (pUSDT and three other test tokens) | `0xe0114adc0a2072b602c645f5a07eefa1eadbdbc2` and 3 more | exact, name/symbol/decimals/supply decoded |
+| PortalSwap | tPotFaucet, tPotStaking | `0x2a9dfcc2…`, `0xc3a38deb…` | exact |
+| PortalSwap | PortalSwapPair | `0x521d8aafeee92e2fa31829faa009fe3698245b93` | exact; the other 9 pools share its code and show as same-code |
 | DotProof | BackingMonitor, CircuitBreaker, LendingMarket | | **no match** with current source |
 
-The last row is the tool working as intended. DotProof's own `SECURITY.md` says those
+For PortalSwap no contract names were given: Bytematch compiled the whole project and
+picked the matching contract for each address.
+
+With these, 27 of the 154 contracts on the V3 testnet have verified source (18 verified
+directly, 9 by sharing code with a verified contract). `GET /v1/network` gives the
+live figure.
+
+The DotProof "no match" row is the tool working as intended. DotProof's own `SECURITY.md` says those
 contracts were deployed before later fixes and are immutable, so the repository no
 longer describes the code on chain.
 
@@ -88,6 +101,7 @@ GET /v1/contracts/:address/abi
 GET /v1/contracts/:address/files
 GET /v1/contracts/:address/bundle   everything needed to reproduce the verification
 GET /v1/contracts                   recently verified
+GET /v1/network                     every contract on the chain with its status (?status=unverified etc.)
 GET /v1/stats
 GET /health
 ```

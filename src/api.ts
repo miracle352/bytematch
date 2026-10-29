@@ -2,6 +2,7 @@ import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { z } from 'zod';
+import { AbiCoder, ParamType } from 'ethers';
 import type { ContractRecord } from './store.js';
 import { describeError, normaliseAddress, type Bytematch, type Submission } from './service.js';
 import { VerifyError, type ErrorCode } from './verify.js';
@@ -48,12 +49,33 @@ export function publicRecord(r: ContractRecord) {
       optimizer: r.optimizer,
       viaIR: r.viaIR,
     },
-    deployment: { tx: r.creationTx, deployer: r.deployer, block: r.deployBlock, constructorArgs: r.constructorArgs },
+    deployment: {
+      tx: r.creationTx,
+      deployer: r.deployer,
+      block: r.deployBlock,
+      constructorArgs: r.constructorArgs,
+      constructorArgsDecoded: decodeConstructorArgs(r.abi, r.constructorArgs),
+    },
     libraries: r.libraries,
     digest: r.digest,
     attestationTx: r.attestationTx,
     verifiedAt: r.verifiedAt,
   };
+}
+
+/** Constructor arguments as name/type/value, or null if they can't be decoded with the ABI. */
+export function decodeConstructorArgs(abi: unknown[], encoded: string | null) {
+  if (!encoded) return null;
+  const ctor = (abi as Array<{ type: string; inputs?: Array<{ name: string; type: string }> }>).find((f) => f.type === 'constructor');
+  if (!ctor?.inputs?.length) return encoded === '0x' ? [] : null;
+  try {
+    const values = AbiCoder.defaultAbiCoder().decode(ctor.inputs.map((i) => ParamType.from(i as never)), encoded);
+    const show = (v: unknown): unknown =>
+      typeof v === 'bigint' ? v.toString() : Array.isArray(v) ? v.map(show) : v;
+    return ctor.inputs.map((input, i) => ({ name: input.name, type: input.type, value: show(values[i]) }));
+  } catch {
+    return null;
+  }
 }
 
 function fail(c: Context, e: unknown) {
