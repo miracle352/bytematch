@@ -53,6 +53,29 @@ export class Chain {
     throw lastErr;
   }
 
+  /** Several calls in one HTTP round trip. Results come back in request order. */
+  async batch<T>(calls: Array<{ method: string; params: unknown[] }>): Promise<T[]> {
+    if (!calls.length) return [];
+    const firstId = this.nextId;
+    this.nextId += calls.length;
+    const body = JSON.stringify(calls.map((c, i) => ({ jsonrpc: '2.0', id: firstId + i, ...c })));
+    const res = await fetch(this.url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body,
+      signal: AbortSignal.timeout(this.timeoutMs),
+    });
+    if (!res.ok) throw new RpcError('batch', res.status, `HTTP ${res.status}`);
+    const json = (await res.json()) as Array<{ id: number; result?: T; error?: { code: number; message: string } }>;
+    const byId = new Map(json.map((r) => [r.id, r]));
+    return calls.map((c, i) => {
+      const r = byId.get(firstId + i);
+      if (!r) throw new RpcError(c.method, undefined, 'missing from batch response');
+      if (r.error) throw new RpcError(c.method, r.error.code, r.error.message);
+      return r.result as T;
+    });
+  }
+
   async chainId(): Promise<number> {
     return Number(await this.rpc<Hex>('eth_chainId', []));
   }
@@ -66,15 +89,33 @@ export class Chain {
     return (await this.rpc<Hex>('eth_getCode', [address, tag])).toLowerCase();
   }
 
+  // Separate parallel requests, not one batch: the node answers a batch's historical
+  // state lookups one after another (measured ~10x slower), but serves parallel
+  // requests concurrently.
+  private async codeExistsAt(address: string, heights: number[]): Promise<boolean[]> {
+    return Promise.all(heights.map(async (h) => (await this.getCode(address, h)) !== '0x'));
+  }
+
   async findDeploymentBlock(address: string): Promise<number | null> {
     let hi = await this.blockNumber();
-    if ((await this.getCode(address, hi)) === '0x') return null;
+    const [atHead, atGenesis] = await this.codeExistsAt(address, [hi, 0]);
+    if (!atHead) return null;
+    if (atGenesis) return 0;
     let lo = 0; // invariant: no code at lo, code at hi
-    if ((await this.getCode(address, lo)) !== '0x') return 0;
+    // Each round probes WAYS heights in parallel: ~6 round trips for 250k blocks, ~3s.
+    // The public node slows down past ~8 concurrent historical lookups.
+    const WAYS = 8;
     while (hi - lo > 1) {
-      const mid = Math.floor((lo + hi) / 2);
-      if ((await this.getCode(address, mid)) === '0x') lo = mid;
-      else hi = mid;
+      const step = Math.max(1, Math.floor((hi - lo) / WAYS));
+      const points: number[] = [];
+      for (let p = lo + step; p < hi; p += step) points.push(p);
+      const present = await this.codeExistsAt(address, points);
+      const first = present.indexOf(true);
+      if (first === -1) lo = points.at(-1) ?? lo;
+      else {
+        hi = points[first]!;
+        if (first > 0) lo = points[first - 1]!;
+      }
     }
     return hi;
   }
@@ -98,13 +139,13 @@ export class Chain {
       'eth_getBlockByNumber',
       ['0x' + blockNumber.toString(16), true],
     );
-    for (const tx of block?.transactions ?? []) {
-      if (tx.to !== null) continue;
-      const receipt = await this.rpc<{ contractAddress: string | null }>('eth_getTransactionReceipt', [tx.hash]);
-      if (receipt?.contractAddress?.toLowerCase() === target) {
-        return { blockNumber, txHash: tx.hash, deployer: tx.from.toLowerCase(), input: tx.input.toLowerCase() };
-      }
-    }
+    const deploys = (block?.transactions ?? []).filter((tx) => tx.to === null);
+    const receipts = await this.batch<{ contractAddress: string | null } | null>(
+      deploys.map((tx) => ({ method: 'eth_getTransactionReceipt', params: [tx.hash] })),
+    );
+    const i = receipts.findIndex((r) => r?.contractAddress?.toLowerCase() === target);
+    const tx = deploys[i];
+    if (tx) return { blockNumber, txHash: tx.hash, deployer: tx.from.toLowerCase(), input: tx.input.toLowerCase() };
     // Created by another contract (factory) or by a native extrinsic. Runtime matching
     // still works; we just can't recover constructor arguments from a tx input.
     return { blockNumber, txHash: null, deployer: null, input: null };
