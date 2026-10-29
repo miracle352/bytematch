@@ -81,8 +81,8 @@ export class Sourcebound {
     const id = randomUUID().replace(/-/g, '');
     this.store.createJob(id, s.address.toLowerCase());
     this.submit(s)
-      .then((r) => this.store.finishJob(id, 'pass', `Pass - Verified (${r.level} match)`))
-      .catch((e: Error) => this.store.finishJob(id, 'fail', `Fail - Unable to verify. ${describeError(e)}`));
+      .then((r) => this.store.finishJob(id, 'pass', `${r.level} match`))
+      .catch((e: Error) => this.store.finishJob(id, 'fail', describeError(e)));
     return id;
   }
 }

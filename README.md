@@ -98,6 +98,10 @@ to a contract that is.
 Errors come back as `{ "error": { "code", "message", "details" } }` with codes
 `bad_input`, `not_contract`, `polkavm`, `compile_error`, `version_mismatch`, `no_match`.
 
+Checked end to end with `@nomicfoundation/hardhat-verify` 2.x (submit, poll, "Successfully
+verified"). Foundry's `--verifier etherscan` uses the same calls but hasn't been run
+against it yet.
+
 ### Foundry
 
 ```sh

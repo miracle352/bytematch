@@ -84,10 +84,16 @@ export function etherscanRoutes(app: Sourcebound) {
       }
 
       case 'checkverifystatus': {
+        // Tools compare `result` against these exact strings, so the detail (match level
+        // or failure reason) goes in `message`, which they ignore.
         const job = app.store.getJob(p.guid ?? '');
         if (!job) return c.json(notOk('Unknown GUID'));
         if (job.status === 'pending') return c.json(notOk('Pending in queue'));
-        return c.json(job.status === 'pass' ? ok(job.message) : notOk(job.message));
+        return c.json(
+          job.status === 'pass'
+            ? { status: '1', message: job.message, result: 'Pass - Verified' }
+            : { status: '0', message: job.message, result: 'Fail - Unable to verify' },
+        );
       }
 
       case 'getsourcecode': {
