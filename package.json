@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:live": "LIVE=1 vitest run test/live",
     "compile:contracts": "tsx scripts/compile-contracts.ts",
-    "deploy:registry": "tsx scripts/deploy-registry.ts"
+    "deploy:registry": "tsx scripts/deploy-registry.ts",
+    "attest:all": "tsx scripts/attest-all.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",

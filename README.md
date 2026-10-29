@@ -209,3 +209,17 @@ It builds, deploys, verifies itself and writes `deployments/portaldot-testnet.js
 ## License
 
 MIT
+
+## Deployment (Portaldot V3 testnet)
+
+| | |
+|---|---|
+| SourceRegistry | `0x6aea3b20e67e8b5b660d0d8eb917c790e190a203` (block 244720), verified by Bytematch itself: exact |
+| Attester | `0x8d375990766be8a0d1e1a93e6f9fa33ac2023ff3` |
+
+The 18 verified contracts in the table above are attested in it; the 9 PortalSwap pools
+that share the pair's code are covered by the pair's attestation without one of their
+own. Details in [`deployments/portaldot-testnet.json`](deployments/portaldot-testnet.json).
+
+Each attestation holds about 7.7 tPOT as a storage deposit (refunded if revoked), which
+is the main running cost on this chain.
