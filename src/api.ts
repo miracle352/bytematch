@@ -101,14 +101,14 @@ export function createApp(app: Bytematch, info: { registry: string | null; netwo
     });
   });
 
-  api.get('/v1/stats', (c) => c.json(app.store.countContracts()));
+  api.get('/v1/stats', async (c) => c.json(await app.store.countContracts()));
 
   // Every contract on the chain with its verification status.
   // ?status=verified|same-code|unverified filters the list; totals always cover everything.
   api.get('/v1/network', async (c) => {
     if (!info.network) return c.json({ error: { code: 'unavailable', message: 'network index disabled' } }, 503);
     try {
-      const cov = coverage(await info.network.get(), app.store);
+      const cov = await coverage(await info.network.get(), app.store);
       const status = c.req.query('status');
       const contracts = status ? cov.contracts.filter((r) => r.status === status) : cov.contracts;
       return c.json({ ...cov, contracts });
@@ -135,10 +135,10 @@ export function createApp(app: Bytematch, info: { registry: string | null; netwo
     }
   });
 
-  api.get('/v1/contracts', (c) => {
+  api.get('/v1/contracts', async (c) => {
     const limit = Math.min(Number(c.req.query('limit') ?? 50) || 50, 200);
     const offset = Math.max(Number(c.req.query('offset') ?? 0) || 0, 0);
-    return c.json({ items: app.store.listContracts(limit, offset).map(publicRecord), limit, offset });
+    return c.json({ items: (await app.store.listContracts(limit, offset)).map(publicRecord), limit, offset });
   });
 
   api.get('/v1/contracts/:address', async (c) => {

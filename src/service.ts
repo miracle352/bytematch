@@ -23,12 +23,19 @@ export interface Lookup {
   record: ContractRecord | null; // for same-code, the record of the contract it shares code with
 }
 
+/**
+ * Keeps work running after the response is sent. A long-running server needs nothing;
+ * on Vercel this is `waitUntil`, without which the function is frozen mid-task.
+ */
+export type Defer = (work: Promise<unknown>) => void;
+
 export class Bytematch {
   constructor(
     readonly chain: Chain,
     readonly store: Store,
     readonly attester: Attester | null,
     private readonly log: (msg: string) => void = () => {},
+    private readonly defer: Defer = () => {},
   ) {}
 
   async submit(s: Submission): Promise<ContractRecord> {
@@ -44,23 +51,25 @@ export class Bytematch {
       v = await verifyAuto(this.chain, { address, sources, contract: s.contract, compilerVersion: s.compilerVersion });
     }
     const record = toRecord(v);
-    const saved = this.store.saveContract(record);
-    const current = saved ? record : this.store.getContract(address)!;
+    const saved = await this.store.saveContract(record);
+    const current = saved ? record : (await this.store.getContract(address))!;
     if (saved) this.attestInBackground(current);
     return current;
   }
 
   private attestInBackground(r: ContractRecord): void {
     if (!this.attester) return;
-    this.attester
-      .attest(r.address, r.digest, r.level)
-      .then((tx) => {
-        if (tx) {
-          this.store.setAttestation(r.address, tx);
-          this.log(`attested ${r.address} (${r.level}) in ${tx}`);
-        }
-      })
-      .catch((e: Error) => this.log(`attestation for ${r.address} failed: ${e.message}`));
+    this.defer(
+      this.attester
+        .attest(r.address, r.digest, r.level)
+        .then(async (tx) => {
+          if (tx) {
+            await this.store.setAttestation(r.address, tx);
+            this.log(`attested ${r.address} (${r.level}) in ${tx}`);
+          }
+        })
+        .catch((e: Error) => this.log(`attestation for ${r.address} failed: ${e.message}`)),
+    );
   }
 
   /** Verified directly, or sharing runtime code with a contract that is. */
@@ -69,20 +78,22 @@ export class Bytematch {
     const code = strip0x(await this.chain.getCode(address));
     if (!code) return { status: 'not-a-contract', address, codeHash: null, record: null };
     const codeHash = keccak256('0x' + code);
-    const own = this.store.getContract(address);
+    const own = await this.store.getContract(address);
     if (own && own.codeHash === codeHash) return { status: 'verified', address, codeHash, record: own };
-    const twin = this.store.findByCodeHash(codeHash);
+    const twin = await this.store.findByCodeHash(codeHash);
     if (twin) return { status: 'same-code', address, codeHash, record: twin };
     return { status: 'unverified', address, codeHash, record: null };
   }
 
   /** Etherscan-style async flow: returns a job id immediately, verifies in the background. */
-  submitJob(s: Submission): string {
+  async submitJob(s: Submission): Promise<string> {
     const id = randomUUID().replace(/-/g, '');
-    this.store.createJob(id, s.address.toLowerCase());
-    this.submit(s)
-      .then((r) => this.store.finishJob(id, 'pass', `${r.level} match`))
-      .catch((e: Error) => this.store.finishJob(id, 'fail', describeError(e)));
+    await this.store.createJob(id, s.address.toLowerCase());
+    this.defer(
+      this.submit(s)
+        .then((r) => this.store.finishJob(id, 'pass', `${r.level} match`))
+        .catch((e: Error) => this.store.finishJob(id, 'fail', describeError(e))),
+    );
     return id;
   }
 }

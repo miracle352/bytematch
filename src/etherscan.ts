@@ -77,7 +77,7 @@ export function etherscanRoutes(app: Bytematch) {
           if (existing?.status === 'verified' && existing.record?.level === 'exact') {
             return c.json(notOk('Contract source code already verified'));
           }
-          return c.json(ok(app.submitJob(s)));
+          return c.json(ok(await app.submitJob(s)));
         } catch (e) {
           return c.json(notOk(describeError(e)));
         }
@@ -86,7 +86,7 @@ export function etherscanRoutes(app: Bytematch) {
       case 'checkverifystatus': {
         // Tools compare `result` against these exact strings, so the detail (match level
         // or failure reason) goes in `message`, which they ignore.
-        const job = app.store.getJob(p.guid ?? '');
+        const job = await app.store.getJob(p.guid ?? '');
         if (!job) return c.json(notOk('Unknown GUID'));
         if (job.status === 'pending') return c.json(notOk('Pending in queue'));
         return c.json(

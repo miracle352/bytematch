@@ -64,22 +64,32 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R
   return out;
 }
 
+const SNAPSHOT_KEY = 'network:snapshot';
+const KNOWN_KEY = 'network:known';
+
 export class NetworkIndex {
   private snapshot: NetworkSnapshot | null = null;
   private refreshing: Promise<NetworkSnapshot> | null = null;
   // Contract code under pallet-revive only changes through set_code, so code read once
-  // is reused; only accounts not seen before are fetched on refresh.
+  // is reused; only accounts not seen before are fetched on refresh. Both the snapshot
+  // and this map live in the store too, so serverless instances share them.
   private known = new Map<string, OnChainContract | null>();
 
   constructor(
     private readonly chain: Chain,
     private readonly substrateUrl: string,
+    private readonly store: Store,
     private readonly maxAgeMs = 10 * 60_000,
   ) {}
 
+  private isFresh(s: NetworkSnapshot | null): s is NetworkSnapshot {
+    return !!s && Date.now() - Date.parse(s.updatedAt) < this.maxAgeMs;
+  }
+
   async get(): Promise<NetworkSnapshot> {
-    const fresh = this.snapshot && Date.now() - Date.parse(this.snapshot.updatedAt) < this.maxAgeMs;
-    if (fresh) return this.snapshot!;
+    if (this.isFresh(this.snapshot)) return this.snapshot;
+    const shared = await this.store.cacheGet<NetworkSnapshot>(SNAPSHOT_KEY).catch(() => null);
+    if (this.isFresh(shared)) return (this.snapshot = shared);
     return this.refresh();
   }
 
@@ -89,6 +99,10 @@ export class NetworkIndex {
   }
 
   private async load(): Promise<NetworkSnapshot> {
+    if (!this.known.size) {
+      const saved = await this.store.cacheGet<Array<[string, OnChainContract | null]>>(KNOWN_KEY).catch(() => null);
+      for (const [a, c] of saved ?? []) this.known.set(a, c);
+    }
     const addresses = await listAccounts(this.substrateUrl);
     const unseen = addresses.filter((a) => !this.known.has(a));
     await mapLimit(unseen, 4, async (address) => {
@@ -100,6 +114,10 @@ export class NetworkIndex {
     });
     const contracts = addresses.map((a) => this.known.get(a)).filter((c): c is OnChainContract => !!c);
     this.snapshot = { updatedAt: new Date().toISOString(), contracts };
+    await Promise.all([
+      this.store.cacheSet(SNAPSHOT_KEY, this.snapshot, Math.ceil(this.maxAgeMs / 1000)),
+      unseen.length ? this.store.cacheSet(KNOWN_KEY, [...this.known], 30 * 86_400) : null,
+    ]).catch(() => undefined);
     return this.snapshot;
   }
 }
@@ -111,13 +129,20 @@ export interface CoverageRow extends OnChainContract {
   verifiedAs: string | null; // for same-code: the verified address it shares code with
 }
 
-export function coverage(snapshot: NetworkSnapshot, store: Store) {
+export async function coverage(snapshot: NetworkSnapshot, store: Store) {
+  const records = await store.listContracts(10_000);
+  const byAddress = new Map(records.map((r) => [r.address, r]));
+  const byCode = new Map<string, (typeof records)[number]>();
+  for (const r of records) {
+    const prev = byCode.get(r.codeHash);
+    if (!prev || (r.level === 'exact' && prev.level !== 'exact')) byCode.set(r.codeHash, r);
+  }
   const rows: CoverageRow[] = snapshot.contracts.map((c) => {
-    const own = store.getContract(c.address);
+    const own = byAddress.get(c.address);
     if (own && own.codeHash === c.codeHash) {
       return { ...c, status: 'verified', name: own.contractName, match: own.level, verifiedAs: null };
     }
-    const twin = store.findByCodeHash(c.codeHash);
+    const twin = byCode.get(c.codeHash);
     if (twin) return { ...c, status: 'same-code', name: twin.contractName, match: twin.level, verifiedAs: twin.address };
     return { ...c, status: 'unverified', name: null, match: null, verifiedAs: null };
   });
