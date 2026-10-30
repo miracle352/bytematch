@@ -1,0 +1,110 @@
+.pc-wrap {
+  position: relative;
+}
+
+.pc {
+  position: relative;
+  background: var(--card);
+  color: var(--ink);
+  padding: clamp(1.2rem, 3vw, 2.2rem) clamp(1rem, 3vw, 2.4rem) clamp(1.4rem, 3vw, 2.4rem);
+  border-radius: 10px;
+  /* the cut corner every punched card had */
+  clip-path: polygon(34px 0, 100% 0, 100% 100%, 0 100%, 0 34px);
+  box-shadow: inset 0 0 0 1px var(--card-edge);
+}
+
+.pc-print {
+  display: flex;
+  gap: 2rem;
+  justify-content: flex-end;
+  font-size: 0.6rem;
+  color: #9b8c64;
+  margin-bottom: 1.2rem;
+}
+
+.pc-holes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12px, 1fr));
+  gap: 10px 7px;
+}
+
+.hole {
+  display: block;
+  aspect-ratio: 0.42;
+  border-radius: 2px;
+  cursor: pointer;
+  /* hover uses the separate `scale` property so it never fights GSAP's transform */
+  transition: scale 0.2s var(--ease), box-shadow 0.2s;
+}
+
+.hole:hover {
+  scale: 1.35;
+}
+
+.h-blank {
+  box-shadow: inset 0 0 0 1px var(--card-edge);
+}
+
+.h-exact {
+  background: var(--exact);
+  box-shadow: 0 0 10px 1px rgb(53 80 255 / 0.55);
+}
+
+.h-twin {
+  background: var(--exact-light);
+  box-shadow: 0 0 8px rgb(127 147 255 / 0.5);
+}
+
+.h-partial {
+  background: var(--partial);
+  box-shadow: 0 0 10px rgb(224 154 45 / 0.55);
+}
+
+.pc-tip {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, calc(-100% - 12px));
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
+  font-size: var(--t-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.5);
+}
+
+.pc-tip strong {
+  font-size: var(--t-sm);
+}
+
+.pc-tip .mono {
+  color: var(--muted-dark);
+}
+
+.pc-legend {
+  list-style: none;
+  padding: 0;
+  margin: 1.2rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.6rem;
+  font-size: var(--t-sm);
+}
+
+.pc-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pc-legend .hole {
+  width: 8px;
+  cursor: default;
+}
+
+.pc-legend .h-blank {
+  background: var(--card);
+}

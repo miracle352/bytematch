@@ -5,7 +5,7 @@
   "description": "Source verification for contracts on Portaldot V3",
   "type": "module",
   "engines": {
-    "node": ">=22.13"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -15,7 +15,9 @@
     "test:live": "LIVE=1 vitest run test/live",
     "compile:contracts": "tsx scripts/compile-contracts.ts",
     "deploy:registry": "tsx scripts/deploy-registry.ts",
-    "attest:all": "tsx scripts/attest-all.ts"
+    "attest:all": "tsx scripts/attest-all.ts",
+    "seed:remote": "tsx scripts/seed-remote.ts",
+    "dev:web": "npm run dev --prefix web"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",

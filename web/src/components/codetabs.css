@@ -1,0 +1,66 @@
+.ct {
+  border-radius: var(--radius-l);
+  background: var(--ink);
+  color: #fff;
+  overflow: hidden;
+}
+
+.ct-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px;
+  border-bottom: 1px solid var(--line-dark);
+  overflow-x: auto;
+}
+
+.ct-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--muted-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: var(--t-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ct-tabs button:hover {
+  color: #fff;
+}
+
+.ct-tabs button.is-on {
+  background: #fff;
+  color: var(--ink);
+}
+
+.ct-panel {
+  padding: 1.4rem clamp(1rem, 3vw, 2rem) 2rem;
+}
+
+.ct-note {
+  margin: 0 0 1rem;
+  color: var(--muted-dark);
+  max-width: 60ch;
+}
+
+.ct-code {
+  position: relative;
+}
+
+.ct-code pre {
+  margin: 0;
+  padding: 1.2rem;
+  border-radius: var(--radius-m);
+  background: var(--ink-2);
+  font-size: 0.72rem;
+  line-height: 1.75;
+  overflow-x: auto;
+  color: #d4dbea;
+}
+
+.ct-code .copy {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+}

@@ -169,6 +169,40 @@ function check(address target, address attester) external view returns (Match le
 On Portaldot, `EXTCODEHASH` returns keccak256 of the deployed EVM code (checked against
 the live chain), so `check` sees the same hash the off-chain verifier computes.
 
+## The site
+
+[`web/`](web) is the frontend: a Vite + React app with a scroll-driven story (GSAP,
+Lenis) and the working pages: contract lookup at `/address/:address` (where Hardhat's
+`browserURL` points), `/verify` and `/network`. It talks to the API on the same origin.
+
+- The hero cards, the byte-by-byte section and the network punch card all use real
+  data: PlaqueLite's deployed bytes and a rebuild under a different path (32 metadata
+  bytes differ), and the live contract list from `/v1/network`, with a bundled
+  snapshot as a fallback.
+- Photograph: keypunch operator, 1950 US Census. U.S. Census Bureau, public domain.
+
+```sh
+npm start              # API on :8787
+npm run dev:web        # site on :5173, proxying the API
+```
+
+## Deploy for free (Vercel + Upstash)
+
+Everything runs on Vercel's free plan: the site is static and the API is one function
+(`api/index.ts`). Results are stored in Upstash Redis, which also has a free plan.
+
+1. On vercel.com, **Add New → Project** and import this repository. Leave the build
+   settings alone; `vercel.json` sets them.
+2. In the project, **Storage → Create → Upstash for Redis** (free) and connect it. This
+   adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
+3. Optionally add `REGISTRY_ADDRESS` (and `ATTESTER_KEY`, a funded testnet key) under
+   **Settings → Environment Variables** so new results are attested on chain.
+4. Redeploy, then copy existing verifications across:
+   `npm run seed:remote -- https://<your-project>.vercel.app`
+
+Verification compiles on the function, so the first request on a cold instance
+downloads the solc build it needs (~8 MB) into `/tmp`.
+
 ## Running it
 
 Node 22.13 or later.

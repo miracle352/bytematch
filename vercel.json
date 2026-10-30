@@ -4,13 +4,31 @@
   "buildCommand": "npm run build --prefix web",
   "outputDirectory": "web/dist",
   "functions": {
-    "api/index.ts": { "maxDuration": 300, "memory": 2048 }
+    "api/index.ts": {
+      "maxDuration": 300,
+      "includeFiles": "node_modules/solc/**"
+    }
   },
   "rewrites": [
-    { "source": "/api", "destination": "/api/index?__path=/api" },
-    { "source": "/v2/api", "destination": "/api/index?__path=/v2/api" },
-    { "source": "/v1/:path*", "destination": "/api/index?__path=/v1/:path*" },
-    { "source": "/health", "destination": "/api/index?__path=/health" },
-    { "source": "/((?!assets/|img/|fonts/|favicon).*)", "destination": "/index.html" }
+    {
+      "source": "/api",
+      "destination": "/api/index?__path=/api"
+    },
+    {
+      "source": "/v2/api",
+      "destination": "/api/index?__path=/v2/api"
+    },
+    {
+      "source": "/v1/:path*",
+      "destination": "/api/index?__path=/v1/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/index?__path=/health"
+    },
+    {
+      "source": "/((?!assets/|img/|fonts/|favicon).*)",
+      "destination": "/index.html"
+    }
   ]
 }

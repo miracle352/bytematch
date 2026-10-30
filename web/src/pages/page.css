@@ -1,0 +1,56 @@
+.page {
+  padding-top: 8.5rem;
+  padding-bottom: 7rem;
+  min-height: 80svh;
+}
+
+.page-title {
+  font-weight: 850;
+  font-size: clamp(2.4rem, 6vw, 4.6rem);
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.page .lede {
+  margin: 1.2rem 0 2rem;
+}
+
+/* Source viewer */
+
+.sv {
+  background: var(--ink);
+  color: #d4dbea;
+  border-radius: var(--radius-m);
+  font-size: 0.7rem;
+  line-height: 1.75;
+  padding: 1rem 0;
+  overflow: auto;
+  max-height: 70svh;
+}
+
+.sv-row {
+  display: flex;
+  min-width: max-content;
+}
+
+.sv-ln {
+  flex: none;
+  width: 3.6rem;
+  padding-right: 1.2rem;
+  text-align: right;
+  color: #56637d;
+  user-select: none;
+}
+
+.sv-code {
+  white-space: pre;
+  padding-right: 1.5rem;
+}
+
+.sv-c { color: #7f8aa3; }
+.sv-s { color: #f2c97d; }
+.sv-k { color: #9aaaff; }
+.sv-t { color: #77d6c2; }
+.sv-n { color: #f0a58a; }

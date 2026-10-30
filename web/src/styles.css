@@ -1,0 +1,251 @@
+/* Bytematch
+   Colour encodes match state everywhere: cobalt = bytes match, amber = only metadata
+   differs, red = no match, grey = not verified. Card stock (manila) is reserved for the
+   punch-card motif. */
+
+:root {
+  --paper: #eef0f3;
+  --paper-2: #e3e7ec;
+  --ink: #101828;
+  --ink-2: #1a2438;
+  --ink-3: #26324a;
+  --line: #ccd2db;
+  --line-dark: #2e3a54;
+  --muted: #5d6676;
+  --muted-dark: #8a95ab;
+  --card: #ede4cb;
+  --card-edge: #d9ccaa;
+
+  --exact: #3550ff;
+  --exact-light: #7f93ff;
+  --exact-wash: #dfe4ff;
+  --partial: #e09a2d;
+  --partial-wash: #fbebd0;
+  --mismatch: #e0464b;
+  --unverified: #a7afbd;
+
+  --sans: 'Schibsted Grotesk', system-ui, sans-serif;
+  --mono: 'Martian Mono', ui-monospace, monospace;
+
+  /* Type scale, ratio ~1.333 from 16px */
+  --t-xs: 0.75rem;
+  --t-sm: 0.875rem;
+  --t-base: 1rem;
+  --t-md: 1.333rem;
+  --t-lg: 1.777rem;
+  --t-xl: 2.369rem;
+  --t-2xl: clamp(2.6rem, 5.2vw, 4.2rem);
+  --t-3xl: clamp(3rem, 7vw, 6.6rem);
+
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --max: 1240px;
+  --radius-s: 6px;
+  --radius-m: 14px;
+  --radius-l: 26px;
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-base);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--exact);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--exact);
+  color: #fff;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  letter-spacing: -0.01em;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- headings ---------- */
+
+.display {
+  font-weight: 850;
+  font-size: var(--t-3xl);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  margin: 0;
+}
+
+.h2 {
+  font-weight: 800;
+  font-size: var(--t-2xl);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin: 0;
+  max-width: 18ch;
+}
+
+.h3 {
+  font-weight: 700;
+  font-size: var(--t-md);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.lede {
+  font-size: var(--t-md);
+  line-height: 1.45;
+  max-width: 38ch;
+  color: var(--muted);
+  margin: 0;
+}
+
+.prose {
+  max-width: 62ch;
+  color: var(--muted);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.4rem;
+  font-weight: 650;
+  font-size: var(--t-base);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), background 0.2s;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--exact);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: inherit;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.btn-ghost:hover {
+  background: rgb(16 24 40 / 0.06);
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- status ---------- */
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  font-weight: 650;
+}
+
+.state::before {
+  content: '';
+  width: 0.62em;
+  height: 0.62em;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.state-exact { color: var(--exact); }
+.state-partial { color: var(--partial); }
+.state-mismatch { color: var(--mismatch); }
+.state-unverified { color: var(--unverified); }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.copy {
+  border: 0;
+  background: rgb(127 147 255 / 0.14);
+  color: inherit;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  cursor: pointer;
+  flex: none;
+}
+
+.copy:hover {
+  background: rgb(127 147 255 / 0.28);
+}

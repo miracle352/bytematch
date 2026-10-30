@@ -1,0 +1,99 @@
+.nw .pc-wrap {
+  margin-top: 1rem;
+}
+
+.nw-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 3.5rem 0 1rem;
+}
+
+.nw-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nw-filters button {
+  border: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+
+.nw-filters button .mono {
+  font-size: 0.66rem;
+  opacity: 0.7;
+}
+
+.nw-filters button.is-on {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: none;
+}
+
+.nw-search input {
+  width: min(320px, 100%);
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: var(--t-sm);
+}
+
+.nw-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.nw-table th {
+  text-align: left;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--muted);
+  padding: 0.6rem 1rem 0.6rem 0;
+  border-bottom: 1px solid var(--ink);
+}
+
+.nw-table td {
+  padding: 0.8rem 1rem 0.8rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--t-sm);
+}
+
+.nw-table td a.mono {
+  font-size: 0.72rem;
+  text-decoration: none;
+}
+
+.nw-table td a.mono:hover {
+  color: var(--exact);
+  text-decoration: underline;
+}
+
+.nw-num {
+  text-align: right !important;
+  padding-right: 0 !important;
+}
+
+.nw-dim {
+  color: var(--muted);
+}
+
+.nw-empty {
+  color: var(--muted);
+  padding: 2rem 0;
+}
+
+@media (max-width: 640px) {
+  .nw-table th:nth-child(4),
+  .nw-table td:nth-child(4) {
+    display: none;
+  }
+}
