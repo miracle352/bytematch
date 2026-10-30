@@ -21,6 +21,21 @@ export interface OnChainAttestation {
   sourceDigest: string;
 }
 
+/** Reads attestations without a key, so a deployment can show on-chain status read-only. */
+export class RegistryReader {
+  private readonly registry: Contract;
+
+  constructor(rpcUrl: string, chainId: number, registryAddress: string, readonly attester: string) {
+    const provider = new JsonRpcProvider(rpcUrl, chainId, { staticNetwork: true });
+    this.registry = new Contract(registryAddress, REGISTRY_ABI, provider);
+  }
+
+  async read(target: string): Promise<OnChainAttestation> {
+    const [level, sourceDigest] = (await this.registry.getFunction('check').staticCall(target, this.attester)) as [bigint, string];
+    return { level: LEVEL_NAME[Number(level)] ?? 'none', sourceDigest };
+  }
+}
+
 export class Attester {
   readonly wallet: Wallet;
   readonly registry: Contract;

@@ -8,6 +8,7 @@ import { describeError, normaliseAddress, type Bytematch, type Submission } from
 import { VerifyError, type ErrorCode } from './verify.js';
 import { etherscanRoutes } from './etherscan.js';
 import { coverage, type NetworkIndex } from './network.js';
+import type { OnChainAttestation } from './attest.js';
 
 const STATUS: Record<ErrorCode, 400 | 404 | 422> = {
   bad_input: 400,
@@ -85,7 +86,10 @@ function fail(c: Context, e: unknown) {
   return c.json({ error: { code: 'internal', message: describeError(e) } }, 500);
 }
 
-export function createApp(app: Bytematch, info: { registry: string | null; network?: NetworkIndex }) {
+export function createApp(
+  app: Bytematch,
+  info: { registry: string | null; network?: NetworkIndex; reader?: { read(target: string): Promise<OnChainAttestation> } | null },
+) {
   const api = new Hono();
   api.use('*', cors());
   api.use('*', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
@@ -145,7 +149,7 @@ export function createApp(app: Bytematch, info: { registry: string | null; netwo
     try {
       const l = await app.lookup(c.req.param('address'));
       const onChain =
-        app.attester && l.codeHash ? await app.attester.read(l.address).catch(() => null) : null;
+        info.reader && l.codeHash ? await info.reader.read(l.address).catch(() => null) : null;
       return c.json({
         status: l.status,
         address: l.address,

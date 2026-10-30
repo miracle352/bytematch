@@ -195,7 +195,7 @@ Everything runs on Vercel's free plan: the site is static and the API is one fun
    settings alone; `vercel.json` sets them.
 2. In the project, **Storage → Create → Upstash for Redis** (free) and connect it. This
    adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
-3. Optionally add `REGISTRY_ADDRESS` (and `ATTESTER_KEY`, a funded testnet key) under
+3. Add `REGISTRY_ADDRESS` to show on-chain status read-only; add `ATTESTER_KEY` (a funded testnet key) too to attest new results. Both go under
    **Settings → Environment Variables** so new results are attested on chain.
 4. Redeploy, then copy existing verifications across:
    `npm run seed:remote -- https://<your-project>.vercel.app`

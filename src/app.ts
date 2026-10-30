@@ -4,7 +4,7 @@
 import { config } from './config.js';
 import { Chain } from './chain.js';
 import { openStore } from './store.js';
-import { Attester } from './attest.js';
+import { Attester, RegistryReader } from './attest.js';
 import { Bytematch, type Defer } from './service.js';
 import { createApp } from './api.js';
 import { NetworkIndex } from './network.js';
@@ -17,8 +17,13 @@ export async function buildApp(opts: { log?: (msg: string) => void; defer?: Defe
     config.registryAddress && config.attesterKey
       ? new Attester(config.rpcUrl, config.chainId, config.registryAddress, config.attesterKey)
       : null;
+  const reader: Pick<RegistryReader, 'read'> | null = attester
+    ? attester
+    : config.registryAddress
+      ? new RegistryReader(config.rpcUrl, config.chainId, config.registryAddress, config.attesterAddress)
+      : null;
   const network = new NetworkIndex(chain, config.substrateUrl, store);
   const app = new Bytematch(chain, store, attester, log, opts.defer);
-  const http = createApp(app, { registry: config.registryAddress || null, network });
+  const http = createApp(app, { registry: config.registryAddress || null, network, reader });
   return { http, app, network, attester, log };
 }
