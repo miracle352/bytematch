@@ -112,18 +112,20 @@ to a contract that is.
 Errors come back as `{ "error": { "code", "message", "details" } }` with codes
 `bad_input`, `not_contract`, `polkavm`, `compile_error`, `version_mismatch`, `no_match`.
 
-Checked end to end with `@nomicfoundation/hardhat-verify` 2.x (submit, poll, "Successfully
-verified"). Foundry's `--verifier etherscan` uses the same calls but hasn't been run
-against it yet.
+Checked end to end with `@nomicfoundation/hardhat-verify` 2.x and with Foundry 1.5
+(`forge verify-contract --verifier custom`): submit, poll, "successfully verified", exact
+match. Foundry 1.x refuses `--verifier etherscan` for chains it doesn't know; use
+`custom`.
 
 ### Foundry
 
 ```sh
 forge verify-contract <address> src/Vault.sol:Vault \
   --chain 420420777 \
-  --verifier etherscan \
+  --verifier custom \
   --verifier-url https://<bytematch-host>/api \
-  --etherscan-api-key unused
+  --verifier-api-key unused \
+  --watch
 ```
 
 ### Hardhat (`@nomicfoundation/hardhat-verify`)
@@ -199,6 +201,10 @@ Everything runs on Vercel's free plan: the site is static and the API is one fun
    **Settings → Environment Variables** so new results are attested on chain.
 4. Redeploy, then copy existing verifications across:
    `npm run seed:remote -- https://<your-project>.vercel.app`
+
+New results on a deployment without `ATTESTER_KEY` are stored but not attested. To
+record them, run from a machine that holds the key (dry run first, then `--send`):
+`npm run attest:remote -- https://<your-project>.vercel.app`
 
 Verification compiles on the function, so the first request on a cold instance
 downloads the solc build it needs (~8 MB) into `/tmp`.

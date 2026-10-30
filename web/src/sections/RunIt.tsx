@@ -28,12 +28,13 @@ npx hardhat verify --network portaldot 0xYourContract`,
     },
     {
       label: 'Foundry',
-      note: 'forge uses the same Etherscan-style calls.',
+      note: 'forge talks to Bytematch as a custom Etherscan-compatible verifier. Run it from your project, as you would for Etherscan.',
       code: `forge verify-contract 0xYourContract src/Token.sol:Token \\
   --chain 420420777 \\
-  --verifier etherscan \\
+  --verifier custom \\
   --verifier-url ${origin}/api \\
-  --etherscan-api-key unused`,
+  --verifier-api-key unused \\
+  --watch`,
     },
     {
       label: 'In a contract',

@@ -67,12 +67,32 @@ export class Chain {
     const firstId = this.nextId;
     this.nextId += calls.length;
     const body = JSON.stringify(calls.map((c, i) => ({ jsonrpc: '2.0', id: firstId + i, ...c })));
-    const res = await fetch(this.url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body,
-      signal: AbortSignal.timeout(this.timeoutMs),
-    });
+    // Same backoff as rpc(): the public node answers 503/429 under load.
+    let res: Response | null = null;
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        res = await fetch(this.url, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body,
+          signal: AbortSignal.timeout(this.timeoutMs),
+        });
+      } catch (e) {
+        lastErr = e;
+        res = null;
+        await sleep(400 * 2 ** attempt);
+        continue;
+      }
+      if (res.status === 429 || res.status >= 500) {
+        lastErr = new RpcError('batch', res.status, `HTTP ${res.status}`);
+        res = null;
+        await sleep(400 * 2 ** attempt);
+        continue;
+      }
+      break;
+    }
+    if (!res) throw lastErr;
     if (!res.ok) throw new RpcError('batch', res.status, `HTTP ${res.status}`);
     const json = (await res.json()) as Array<{ id: number; result?: T; error?: { code: number; message: string } }>;
     const byId = new Map(json.map((r) => [r.id, r]));
