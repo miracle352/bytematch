@@ -18,7 +18,7 @@ export function Nav() {
   useEffect(() => setOpen(false), [pathname]);
 
   return (
-    <header className={`nav ${floating || pathname !== '/' ? 'nav-floating' : ''} ${open ? 'nav-open' : ''}`}>
+    <header className={`nav ${floating || pathname !== '/' ? 'nav-floating' : 'nav-on-dark'} ${open ? 'nav-open' : ''}`}>
       <div className="nav-bar">
         <Link to="/" className="nav-brand" aria-label="Bytematch home">
           <Logo />

@@ -1,0 +1,240 @@
+.rdm {
+  background: var(--paper);
+  padding: 9rem 0 8rem;
+  overflow: hidden;
+}
+
+.rdm-title {
+  max-width: 16ch;
+  text-wrap: balance;
+  margin-bottom: 3.5rem;
+}
+
+.rd-window {
+  border-radius: var(--radius-l);
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 60px 120px -50px rgb(16 24 40 / 0.6), 0 0 0 1px rgb(16 24 40 / 0.1);
+  overflow: hidden;
+}
+
+.rd-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line-dark);
+}
+
+.rd-bar > i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+
+.rd-url {
+  flex: 1;
+  margin-left: 12px;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  background: var(--ink-2);
+  font-size: 0.74rem;
+  color: #d4dbea;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.rd-caret {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: var(--exact-light);
+}
+
+.rd-caret-done {
+  animation: rd-blink 1s steps(2) infinite;
+}
+
+@keyframes rd-blink {
+  50% { opacity: 0; }
+}
+
+.rd-replay {
+  border: 0;
+  background: none;
+  color: var(--muted-dark);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.rd-replay:hover { color: #fff; }
+
+.rd-body {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  gap: 2rem;
+  padding: 1.8rem;
+  min-height: 30rem;
+}
+
+.rd-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  font-size: 0.72rem;
+  color: var(--ink-3);
+}
+
+.rd-steps li {
+  transition: color 0.3s;
+}
+
+.rd-steps li::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.7rem;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.rd-steps .is-on {
+  color: #fff;
+}
+
+.rd-steps .is-on::before {
+  animation: rd-blink 0.6s steps(2) infinite;
+  background: var(--exact-light);
+}
+
+.rd-steps .is-done {
+  color: var(--muted-dark);
+}
+
+.rd-steps .is-done::before {
+  background: var(--exact);
+}
+
+.rd-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rd-rows li {
+  display: grid;
+  grid-template-columns: 1fr auto auto 10rem;
+  gap: 1.4rem;
+  align-items: center;
+  padding: 0.7rem 0.4rem;
+  border-bottom: 1px solid var(--line-dark);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s var(--ease), transform 0.45s var(--ease), background 0.6s;
+}
+
+.rd-rows li.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.rd-rows li.is-done {
+  animation: rd-flash 0.9s var(--ease);
+}
+
+@keyframes rd-flash {
+  0% { background: rgb(53 80 255 / 0.3); }
+  100% { background: transparent; }
+}
+
+.rd-name {
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rd-addr,
+.rd-size {
+  font-size: 0.66rem;
+  color: var(--muted-dark);
+}
+
+.rd-result .state {
+  font-size: var(--t-sm);
+  animation: rd-pop 0.4s var(--ease);
+}
+
+.rd-result .state-exact {
+  color: var(--exact-light);
+}
+
+@keyframes rd-pop {
+  from { transform: scale(0.6); opacity: 0; }
+}
+
+.rd-bar-load {
+  display: block;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--ink-3), var(--exact-light), var(--ink-3));
+  background-size: 200% 100%;
+  animation: rd-load 0.8s linear infinite;
+}
+
+@keyframes rd-load {
+  to { background-position: -200% 0; }
+}
+
+.rd-total {
+  margin: 1.6rem 0 0;
+  font-size: var(--t-md);
+  color: var(--muted-dark);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s, transform 0.6s var(--ease);
+}
+
+.rd-total.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.rd-total .mono {
+  color: #fff;
+}
+
+.rd-total a {
+  color: var(--exact-light);
+}
+
+.rdm-table {
+  margin-top: 5rem;
+  display: grid;
+  gap: 2rem;
+  justify-items: start;
+}
+
+@media (max-width: 860px) {
+  .rd-body {
+    grid-template-columns: 1fr;
+    padding: 1.2rem;
+  }
+
+  .rd-rows li {
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem 1rem;
+  }
+
+  .rd-addr,
+  .rd-size {
+    display: none;
+  }
+}

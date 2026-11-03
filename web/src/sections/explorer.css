@@ -1,0 +1,224 @@
+.ex {
+  background: var(--ink);
+  color: #fff;
+}
+
+.ex-stage {
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.ex-track {
+  display: flex;
+  align-items: center;
+  gap: 4vw;
+  padding-inline: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter)));
+  will-change: transform;
+}
+
+.ex-intro {
+  flex: none;
+  width: min(36rem, 80vw);
+}
+
+.ex-intro .h2 {
+  text-wrap: balance;
+}
+
+.ex-panel {
+  flex: none;
+  width: min(34rem, 82vw);
+  display: grid;
+  gap: 1.2rem;
+}
+
+.ex-h {
+  margin: 0;
+  font-size: var(--t-lg);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.ex-card {
+  position: relative;
+  min-height: 24rem;
+  border-radius: var(--radius-l);
+  background: var(--ink-2);
+  box-shadow: inset 0 0 0 1px var(--line-dark);
+  padding: 1.6rem;
+  overflow: hidden;
+}
+
+.ex-card::before {
+  content: '';
+  position: absolute;
+  inset: -40% -40% auto auto;
+  width: 70%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(53 80 255 / 0.3), transparent 65%);
+  pointer-events: none;
+}
+
+.ex-live {
+  margin: 0 0 1.2rem;
+  font-size: 0.7rem;
+  color: var(--muted-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ex-live i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3ddc84;
+  box-shadow: 0 0 0 0 rgb(61 220 132 / 0.6);
+  animation: ex-live 1.6s infinite;
+}
+
+@keyframes ex-live {
+  70% { box-shadow: 0 0 0 9px rgb(61 220 132 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(61 220 132 / 0); }
+}
+
+.ex-read dl {
+  margin: 0;
+}
+
+.ex-read dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line-dark);
+}
+
+.ex-read dt {
+  color: var(--muted-dark);
+  font-size: 0.72rem;
+}
+
+.ex-read dd {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #fff;
+}
+
+.ex-read small {
+  color: var(--muted-dark);
+}
+
+.ex-link {
+  display: inline-block;
+  margin-top: 1.4rem;
+  color: var(--exact-light);
+  font-weight: 600;
+}
+
+.ex-proxy {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 4rem;
+}
+
+.ex-diagram {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ex-wire {
+  fill: none;
+  stroke: var(--exact-light);
+  stroke-width: 2;
+  stroke-dasharray: 300;
+}
+
+.ex-pulse {
+  fill: #fff;
+}
+
+.ex-box {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.1rem;
+  border-radius: var(--radius-m);
+  background: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-dark);
+}
+
+.ex-box .mono {
+  font-size: 0.66rem;
+  color: var(--muted-dark);
+}
+
+.ex-impl {
+  box-shadow: inset 0 0 0 1px var(--exact), 0 0 40px -10px var(--exact);
+}
+
+.ex-impl .state-exact {
+  color: var(--exact-light);
+}
+
+.ex-kinds {
+  position: absolute;
+  left: 1.6rem;
+  bottom: 1.4rem;
+  margin: 0;
+  font-size: 0.66rem;
+  color: var(--muted-dark);
+}
+
+.ex-badge {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2rem;
+}
+
+.ex-badge-big {
+  height: 56px;
+  width: auto;
+  filter: drop-shadow(0 20px 40px rgb(53 80 255 / 0.5));
+}
+
+.ex-badge pre {
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.66rem;
+  color: var(--muted-dark);
+}
+
+@media (max-width: 860px), (prefers-reduced-motion: reduce) {
+  .ex-stage {
+    height: auto;
+    padding: 7rem 0;
+  }
+
+  .ex-track {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .ex-panel,
+  .ex-intro {
+    width: 100%;
+  }
+
+  .ex-proxy {
+    gap: 1.5rem;
+  }
+
+  .ex-wire {
+    stroke-dashoffset: 0;
+  }
+}

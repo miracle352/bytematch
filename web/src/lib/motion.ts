@@ -35,3 +35,10 @@ export function scrollToId(id: string) {
   if (lenis) lenis.scrollTo(el, { offset: -20 });
   else el.scrollIntoView();
 }
+
+let refreshTimer = 0;
+/** Recompute scroll-trigger positions after content above them changed height. */
+export function refreshSoon() {
+  clearTimeout(refreshTimer);
+  refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 120);
+}

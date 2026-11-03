@@ -142,3 +142,7 @@
     transform: translateY(-3.5px) rotate(-45deg);
   }
 }
+
+.nav-on-dark .nav-bar {
+  color: #fff;
+}

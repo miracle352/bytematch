@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, type Network } from './api';
 import snapshot from '../data/network-snapshot.json';
+import { refreshSoon } from './motion';
 
 /** Live coverage from the API; falls back to the snapshot bundled at build time. */
 export function useNetwork() {
@@ -14,7 +15,11 @@ export function useNetwork() {
     let cancelled = false;
     api
       .network()
-      .then((data) => !cancelled && setState({ data, live: true, loading: false }))
+      .then((data) => {
+        if (cancelled) return;
+        setState({ data, live: true, loading: false });
+        refreshSoon();
+      })
       .catch(() => !cancelled && setState((s) => ({ ...s, loading: false })));
     return () => {
       cancelled = true;

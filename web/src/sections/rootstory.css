@@ -1,0 +1,74 @@
+.rt {
+  background: var(--paper);
+}
+
+.rt-stage {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  padding: 6rem 0 4rem;
+}
+
+.rt-title {
+  max-width: 14ch;
+}
+
+.rt-svg {
+  width: 100%;
+  margin: 2.5rem 0 1.5rem;
+  overflow: visible;
+}
+
+.rt-edge {
+  fill: none;
+  stroke: var(--exact);
+  stroke-width: 1.6;
+  stroke-dasharray: 1;
+}
+
+.rt-node {
+  fill: var(--exact);
+}
+
+.rt-node-3 {
+  fill: var(--ink);
+  stroke: var(--exact);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 18px rgb(53 80 255 / 0.7));
+}
+
+.rt-leaf rect {
+  fill: #fff;
+  stroke: var(--line);
+}
+
+.rt-leaf text {
+  font-family: var(--mono);
+  font-size: 10px;
+  fill: var(--ink);
+}
+
+.rt-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem clamp(2rem, 7vw, 6rem);
+  margin: 0;
+}
+
+.rt-facts dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: var(--t-xl);
+  letter-spacing: -0.05em;
+  color: var(--exact);
+}
+
+.rt-facts dt {
+  color: var(--muted);
+}
+
+@media (max-width: 700px) {
+  .rt-leaf text { font-size: 22px; }
+  .rt-svg { margin-inline: -1rem; width: calc(100% + 2rem); }
+}

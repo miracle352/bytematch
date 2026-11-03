@@ -74,7 +74,7 @@ curl -X POST ${origin}/v1/repos \\
   return (
     <section className="ri" id="tools">
       <div className="wrap ri-grid">
-        <h2 className="h2 ri-copy">For people, their tools, and their agents.</h2>
+        <h2 className="h2 ri-copy">Works with the tools you deploy with.</h2>
         <CodeTabs tabs={tabs} />
       </div>
     </section>
