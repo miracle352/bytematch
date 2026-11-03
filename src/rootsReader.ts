@@ -33,22 +33,35 @@ export class RootsReader {
     this.contract = new Contract(address, ROOTS_ABI, provider);
   }
 
-  /** The tree behind the attester's current root, rebuilt from the event that published it. */
+  /**
+   * The tree behind the attester's current root. Each RootPublished event carries the
+   * entries added since the one before (the first ones carried everything), so the tree
+   * is the union of the attester's events up to the one that published the current root.
+   */
   async tree(): Promise<RootTree | null> {
     if (this.cache && Date.now() - this.cache.at < 60_000) return this.cache.tree;
-    const root = (await this.contract.getFunction('roots').staticCall(this.attester, 0)) as string;
+    const root = ((await this.contract.getFunction('roots').staticCall(this.attester, 0)) as string).toLowerCase();
     let tree: RootTree | null = null;
     let tx: string | undefined;
     let block: number | undefined;
     if (!/^0x0{64}$/.test(root)) {
-      const logs = await this.contract.queryFilter(this.contract.filters.RootPublished!(this.attester, root), this.fromBlock, 'latest');
-      // args[2] is `entries`; by name it would collide with Array.prototype.entries
-      const log = logs.at(-1) as { args?: unknown[]; transactionHash?: string; blockNumber?: number } | undefined;
-      tx = log?.transactionHash;
-      block = log?.blockNumber;
-      if (log?.args) {
-        tree = new RootTree(RootTree.unpack(log.args[2] as string));
-        if (tree.root !== root.toLowerCase()) tree = null; // never serve proofs for a tree that doesn't match
+      const logs = (await this.contract.queryFilter(this.contract.filters.RootPublished!(this.attester), this.fromBlock, 'latest')) as unknown as Array<{
+        args: unknown[];
+        transactionHash: string;
+        blockNumber: number;
+      }>;
+      const entries: RootEntry[] = [];
+      for (const log of logs) {
+        // args[2] is `entries`; by name it would collide with Array.prototype.entries
+        entries.push(...RootTree.unpack(log.args[2] as string));
+        if ((log.args[1] as string).toLowerCase() === root) {
+          const t = new RootTree(entries);
+          if (t.root === root) {
+            tree = t; // never serve proofs for a tree that doesn't hash to the on-chain root
+            tx = log.transactionHash;
+            block = log.blockNumber;
+          }
+        }
       }
     }
     this.cache = { at: Date.now(), tree, root, tx, block };

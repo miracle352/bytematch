@@ -4,13 +4,14 @@
 //   npm run publish:root -- https://bytematch-portaldot.vercel.app           # dry run
 //   npm run publish:root -- https://bytematch-portaldot.vercel.app --send
 //
-// The first publish pays the storage deposit for the root slots; later ones overwrite
-// them and cost about 0.03 POT however many contracts they cover.
+// The event carries only the entries that are new since the current root (readers take
+// the union of all events), so an update costs a base fee plus a little per new program.
+// The first two publishes paid the storage deposit for the two root slots.
 
 import { Contract, JsonRpcProvider, Wallet, formatEther } from 'ethers';
 import { config } from '../src/config.js';
 import { RootTree, type RootEntry } from '../src/roots.js';
-import { ROOTS_ABI } from '../src/rootsReader.js';
+import { ROOTS_ABI, RootsReader } from '../src/rootsReader.js';
 
 const base = process.argv[2]?.replace(/\/$/, '');
 if (!base) throw new Error('usage: npm run publish:root -- <base url> [--send]');
@@ -24,7 +25,7 @@ for (let offset = 0; ; offset += 200) {
   entries.push(...r.items.map((i) => ({ codeHash: i.codeHash, level: (i.match === 'exact' ? 2 : 1) as 1 | 2, sourceDigest: i.digest })));
   if (r.items.length < 200) break;
 }
-const tree = new RootTree(entries);
+let tree = new RootTree(entries);
 
 const provider = new JsonRpcProvider(config.rpcUrl, config.chainId, { staticNetwork: true });
 const wallet = new Wallet(config.attesterKey, provider);
@@ -35,12 +36,26 @@ if (current.toLowerCase() === tree.root) {
   console.log('already on chain');
   process.exit(0);
 }
-const data = roots.interface.encodeFunctionData('publish', [tree.root, tree.packed()]);
+const known = await new RootsReader(provider, config.rootsAddress, wallet.address, config.rootsFromBlock).tree();
+if (!known && !/^0x0{64}$/.test(current)) throw new Error('could not rebuild the current root from events; refusing to publish a delta');
+const leafKey = (e: RootEntry) => `${e.codeHash}|${e.level}|${e.sourceDigest}`;
+const have = new Set((known?.entries ?? []).map(leafKey));
+// Readers rebuild the union of every event, so the new root is over (on chain ∪ API).
+tree = new RootTree([...(known?.entries ?? []), ...entries]);
+if (tree.root === current.toLowerCase()) {
+  console.log('nothing new since the current root');
+  process.exit(0);
+}
+const delta = new RootTree(tree.entries.filter((e) => !have.has(leafKey(e))));
+const rebuilt = new RootTree([...(known?.entries ?? []), ...delta.entries]);
+if (rebuilt.root !== tree.root) throw new Error('union of published entries does not reproduce the new root');
+console.log(`${delta.entries.length} new or upgraded programs to publish`);
+const data = roots.interface.encodeFunctionData('publish', [tree.root, delta.packed()]);
 const gas = await provider.estimateGas({ from: wallet.address, to: config.rootsAddress, data });
 const price = (await provider.getFeeData()).gasPrice ?? 0n;
 console.log(`publishing costs ~${formatEther(gas * price)} POT; balance ${formatEther(await provider.getBalance(wallet.address))}`);
 if (!process.argv.includes('--send')) process.exit(0);
-const tx = await roots.getFunction('publish')(tree.root, tree.packed());
+const tx = await roots.getFunction('publish')(tree.root, delta.packed());
 const receipt = await tx.wait();
 if (receipt?.status !== 1) throw new Error(`publish failed in ${tx.hash}`);
 console.log(`published in ${tx.hash}, block ${receipt.blockNumber}`);

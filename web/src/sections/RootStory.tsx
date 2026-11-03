@@ -84,8 +84,8 @@ export function RootStory() {
               <dt>storage slot</dt>
             </div>
             <div>
-              <dd>~0.03</dd>
-              <dt>tPOT per update</dt>
+              <dd>~0.01</dd>
+              <dt>tPOT per contract, not ~9</dt>
             </div>
           </dl>
         </div>

@@ -70,6 +70,18 @@ describe('SourceRoots', () => {
     expect(tree.proof({ ...ea, sourceDigest: D('other') })).toBeNull();
   });
 
+  it('rebuilds the same root from incremental entry lists', () => {
+    const first = new RootTree(tree.entries.slice(0, 20));
+    const upgrade = { ...eb, level: 2 as const };
+    const all = new RootTree([...first.entries, ...tree.entries, upgrade]);
+    const have = new Set(first.entries.map((e) => `${e.codeHash}|${e.level}|${e.sourceDigest}`));
+    const delta = all.entries.filter((e) => !have.has(`${e.codeHash}|${e.level}|${e.sourceDigest}`));
+    expect(delta.length).toBeLessThan(all.entries.length);
+    const rebuilt = new RootTree([...RootTree.unpack(first.packed()), ...RootTree.unpack(new RootTree(delta).packed())]);
+    expect(rebuilt.root).toBe(all.root);
+    expect(rebuilt.find(eb.codeHash)!.level).toBe(2);
+  });
+
   it('round-trips the packed entries', () => {
     expect(RootTree.unpack(tree.packed())).toEqual(tree.entries);
   });
