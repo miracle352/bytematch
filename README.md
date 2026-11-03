@@ -47,8 +47,21 @@ other contracts can read it.
 
 ## Results on the V3 testnet
 
-Contracts from other Hacker House projects, verified from their public repositories
-with the settings recorded in those repositories:
+Every Portaldot Hacker House 2026 submission with a GitHub repository (74 of 75) was
+put through `POST /v1/repos`, with nothing but its URL:
+
+- 73 repositories read; 55 of them name contracts that are deployed on the V3 testnet.
+- 46 of those 55 have at least one contract matched to their source: **49 exact and
+  44 partial matches**, found and verified automatically.
+- 29 deployed contracts did not match the repository as it is now (often the
+  repository moved on after deploying, or the address is a token the project only uses).
+- One repository timed out on Vercel's 5-minute function limit.
+
+Across the chain, 108 of 240 contracts now have source anyone can check (94 verified
+directly, 14 by sharing code with a verified contract). `GET /v1/repos` and
+`GET /v1/network` give the live figures.
+
+Earlier, hand-picked checks, with the settings recorded in each repository:
 
 | Project | Contract | Address | Result |
 |---|---|---|---|
@@ -70,10 +83,6 @@ with the settings recorded in those repositories:
 
 For PortalSwap no contract names were given: Bytematch compiled the whole project and
 picked the matching contract for each address.
-
-With these, 27 of the 154 contracts on the V3 testnet have verified source (18 verified
-directly, 9 by sharing code with a verified contract). `GET /v1/network` gives the
-live figure.
 
 The DotProof "no match" row is the tool working as intended. DotProof's own `SECURITY.md` says those
 contracts were deployed before later fixes and are immutable, so the repository no
