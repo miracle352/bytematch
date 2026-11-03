@@ -246,7 +246,7 @@ export function AddressPage() {
           <section className="ad-section" id="code">
             <div className="ad-tabs" role="tablist">
               <button role="tab" aria-selected={tab === 'source'} onClick={() => setTab('source')}>
-                Source {files ? `(${Object.keys(files).length} files)` : ''}
+                Source {files ? `(${Object.keys(files).length} ${Object.keys(files).length === 1 ? "file" : "files"})` : ''}
               </button>
               <button role="tab" aria-selected={tab === 'read'} onClick={() => setTab('read')}>
                 Read
