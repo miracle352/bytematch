@@ -18,8 +18,8 @@ export const config = {
   registryAddress: process.env.REGISTRY_ADDRESS || '',
   attesterKey: process.env.ATTESTER_KEY || '',
   // SourceRoots: every verification as one Merkle root. Empty until deployed.
-  rootsAddress: process.env.ROOTS_ADDRESS ?? '',
-  rootsFromBlock: Number(process.env.ROOTS_FROM_BLOCK ?? 0),
+  rootsAddress: process.env.ROOTS_ADDRESS ?? '0x0f9691a6aae5d9b5ed7190551049ced18b8ed086',
+  rootsFromBlock: Number(process.env.ROOTS_FROM_BLOCK ?? 306369),
   // Whose attestations to show when running read-only (no ATTESTER_KEY).
   attesterAddress: process.env.ATTESTER_ADDRESS || '0x8d375990766be8a0d1e1a93e6f9fa33ac2023ff3',
   solcBinBase: env('SOLC_BIN_BASE', 'https://binaries.soliditylang.org/bin'),

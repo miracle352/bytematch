@@ -38,9 +38,10 @@ export class RootsReader {
     let tree: RootTree | null = null;
     if (!/^0x0{64}$/.test(root)) {
       const logs = await this.contract.queryFilter(this.contract.filters.RootPublished!(this.attester, root), this.fromBlock, 'latest');
-      const log = logs.at(-1) as { args?: { entries: string } } | undefined;
+      // args[2] is `entries`; by name it would collide with Array.prototype.entries
+      const log = logs.at(-1) as { args?: unknown[] } | undefined;
       if (log?.args) {
-        tree = new RootTree(RootTree.unpack(log.args.entries));
+        tree = new RootTree(RootTree.unpack(log.args[2] as string));
         if (tree.root !== root.toLowerCase()) tree = null; // never serve proofs for a tree that doesn't match
       }
     }

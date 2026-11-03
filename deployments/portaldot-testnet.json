@@ -22,5 +22,23 @@
       "level": "exact",
       "digest": "0x7da6bedb48e2e065862e36f74da207092697c8979dc6fba3b7d82fbda6ce0152"
     }
+  },
+  "SourceRoots": {
+    "address": "0x0f9691a6aae5d9b5ed7190551049ced18b8ed086",
+    "tx": "0xb9fffafd15f0171c8f4aee75ca2545bad51c2d45e73a300a650f025800a8515e",
+    "block": 306369,
+    "deployer": "0x8d375990766be8a0d1e1a93e6f9fa33ac2023ff3",
+    "compiler": "0.8.28",
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "evmVersion": "cancun",
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      }
+    },
+    "source": "contracts/SourceRoots.sol"
   }
 }

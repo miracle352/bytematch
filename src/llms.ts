@@ -51,5 +51,10 @@ All endpoints are JSON over HTTPS at ${origin}. No key or account.
 SourceRegistry ${'0x6aea3b20e67e8b5b660d0d8eb917c790e190a203'} on Portaldot V3:
 check(address target, address attester) returns (uint8 level, bytes32 sourceDigest),
 level 2 = exact, 1 = partial, 0 = none. Attester: 0x8d375990766be8a0d1e1a93e6f9fa33ac2023ff3.
+
+SourceRoots 0x0f9691a6aae5d9b5ed7190551049ced18b8ed086 holds one Merkle root over every
+verification, published with the full entry list in its RootPublished event:
+check(address target, address attester, uint8 level, bytes32 sourceDigest, bytes32[] proof)
+returns (uint8). GET ${origin}/v1/contracts/{address} returns onChain.proof for it.
 `;
 }

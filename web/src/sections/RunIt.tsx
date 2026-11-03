@@ -56,7 +56,12 @@ ISourceRegistry constant REGISTRY = ISourceRegistry(${REGISTRY_ADDRESS});
 address constant BYTEMATCH = ${ATTESTER};
 
 (uint8 level, ) = REGISTRY.check(token, BYTEMATCH);
-require(level == 2, "token source not verified");`,
+require(level == 2, "token source not verified");
+
+// Every verification since: one Merkle root in SourceRoots
+// 0x0f9691a6aae5d9b5ed7190551049ced18b8ed086. The proof comes from
+// GET /v1/contracts/<address> → onChain.proof
+ROOTS.check(token, BYTEMATCH, 2, sourceDigest, proof); // 2, or 0`,
     },
     {
       label: 'README',

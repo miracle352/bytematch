@@ -201,6 +201,29 @@ function check(address target, address attester) external view returns (Match le
 On Portaldot, `EXTCODEHASH` returns keccak256 of the deployed EVM code (checked against
 the live chain), so `check` sees the same hash the off-chain verifier computes.
 
+## SourceRoots: every verification for the cost of one
+
+A new storage slot on Portaldot costs a deposit of about 4.5 POT, so one SourceRegistry
+attestation (two slots) costs about 9 POT, and a hackathon allowance of 500 tPOT covers
+about 54 contracts. Overwriting a slot costs about 0.03 POT.
+
+[`SourceRoots`](contracts/SourceRoots.sol) (`0x0f9691a6aae5d9b5ed7190551049ced18b8ed086`)
+therefore keeps one Merkle root per attester over all its results, keyed by code hash.
+Each update overwrites the same slot. The full entry list (65 bytes per program) goes
+into the `RootPublished` event, so anyone can rebuild the tree and every proof from the
+chain alone; the API does exactly that ([`src/rootsReader.ts`](src/rootsReader.ts)) and
+never serves a proof for a tree that doesn't hash to the on-chain root.
+
+The first root, published in
+`0x0a581a6e11fe3a72f59cea49e9618d9d8679922154c734a67c585c72f283f275`, covers 89 distinct
+programs (94 verifications) for 4.5 POT. Contracts gate on it with
+`check(target, attester, level, sourceDigest, proof)`, which returns the level or 0.
+
+```sh
+npm run deploy:roots -- --send                                  # once
+npm run publish:root -- https://bytematch-portaldot.vercel.app --send   # after new verifications
+```
+
 ## The site
 
 [`web/`](web) is the frontend: a Vite + React app. The home page has one field, for an
