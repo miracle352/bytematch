@@ -25,13 +25,10 @@ export function Nav() {
           <span>bytematch</span>
         </Link>
         <nav className="nav-links" aria-label="Main">
-          <Link to="/#how">How it works</Link>
+          <NavLink to="/repos">Repositories</NavLink>
           <NavLink to="/network">Network</NavLink>
           <NavLink to="/verify">Verify</NavLink>
         </nav>
-        <Link to="/verify" className="btn nav-cta">
-          Verify a contract
-        </Link>
         <button className="nav-toggle" aria-expanded={open} aria-label="Menu" onClick={() => setOpen((o) => !o)}>
           <span />
           <span />

@@ -30,6 +30,37 @@ export interface ContractLookup {
   verification: Verification | null;
   abi: AbiItem[] | null;
   onChain: { level: 'none' | 'partial' | 'exact'; sourceDigest: string } | null;
+  proxy: { kind: 'eip1967' | 'beacon' | 'eip1167'; implementation: string; status: LookupStatus | null; name: string | null; abi: AbiItem[] | null } | null;
+}
+
+export type RepoStatus = 'exact' | 'partial' | 'no_match' | 'polkavm';
+
+export interface RepoReport {
+  repo: string;
+  ref: string;
+  url: string;
+  scannedAt: string;
+  projects: Array<{ root: string; tool: 'foundry' | 'hardhat' | 'plain'; sources: number; compiler: string | null; problem: string | null }>;
+  mentioned: number;
+  contracts: Array<{ address: string; size: number; codeHash: string; status: RepoStatus; name: string | null }>;
+}
+
+export interface RepoSummary {
+  repo: string;
+  url: string;
+  scannedAt: string;
+  contracts: number;
+  exact: number;
+  partial: number;
+  differ: number;
+}
+
+export interface StateValue {
+  name: string;
+  signature: string;
+  outputs: string[];
+  value: unknown;
+  error?: string;
 }
 
 export interface AbiItem {
@@ -98,6 +129,18 @@ export const api = {
   files: (address: string) => request<Record<string, string>>(`/v1/contracts/${address}/files`),
   network: () => request<Network>('/v1/network'),
   recent: (limit = 12) => request<{ items: Verification[] }>(`/v1/contracts?limit=${limit}`),
+  repos: () => request<{ items: RepoSummary[] }>('/v1/repos'),
+  repo: (repo: string) => request<RepoReport>(`/v1/repos/${repo}`),
+  scanRepo: (url: string) =>
+    request<RepoReport>('/v1/repos', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url }) }),
+  state: (address: string, abi?: string) =>
+    request<{ values: StateValue[] }>(`/v1/contracts/${address}/state${abi ? `?abi=${abi}` : ''}`),
+  call: (address: string, fn: string, args: unknown[], abi?: string) =>
+    request<{ result: unknown }>(`/v1/contracts/${address}/call`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ function: fn, args, abi }),
+    }),
   verify: (body: unknown) =>
     request<Verification>('/v1/verify', {
       method: 'POST',

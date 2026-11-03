@@ -1,12 +1,19 @@
 .cs {
-  background: var(--ink);
+  background: var(--paper);
   color: #fff;
 }
 
 .cs-stage {
   position: relative;
   height: 100svh;
+}
+
+.cs-frame {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
+  background: var(--ink);
+  clip-path: inset(0% 5% 8% 5% round 26px);
 }
 
 .cs-photo {
@@ -29,7 +36,7 @@
   opacity: 0.2;
 }
 
-.cs-stage::after {
+.cs-frame::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -83,6 +90,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .cs-frame {
+    position: relative;
+    clip-path: none;
+    min-height: 100svh;
+    padding: 6rem 0;
+  }
+
   .cs-stage {
     height: auto;
     min-height: 100svh;

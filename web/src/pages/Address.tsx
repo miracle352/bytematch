@@ -5,10 +5,12 @@ import { isAddress, short } from '../lib/format';
 import { Copy } from '../components/Copy';
 import { Fingerprint } from '../components/Fingerprint';
 import { SolidityView } from '../components/SolidityView';
+import { ReadPanel } from '../components/ReadPanel';
 import './page.css';
 import './address.css';
 
 const LEVEL_TEXT = { exact: 'Exact match', partial: 'Partial match' } as const;
+const PROXY_KIND = { eip1967: 'Proxy', beacon: 'Beacon proxy', eip1167: 'Clone' } as const;
 
 function signature(f: AbiItem) {
   return `${f.name ?? f.type}(${(f.inputs ?? []).map((i) => `${i.type}${i.name ? ' ' + i.name : ''}`).join(', ')})`;
@@ -18,7 +20,7 @@ export function AddressPage() {
   const { address = '' } = useParams();
   const [data, setData] = useState<ContractLookup | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
-  const [tab, setTab] = useState<'source' | 'abi'>('source');
+  const [tab, setTab] = useState<'source' | 'read' | 'abi'>('source');
   const [files, setFiles] = useState<Record<string, string> | null>(null);
   const [file, setFile] = useState<string>('');
 
@@ -91,6 +93,15 @@ export function AddressPage() {
               , which is. Same bytes, same source.
             </p>
           )}
+          {data.proxy && (
+            <p className="ad-proxy">
+              <span className="ad-proxy-kind">{PROXY_KIND[data.proxy.kind]}</span> for{' '}
+              <Link to={`/address/${data.proxy.implementation}`}>
+                {data.proxy.name ?? <span className="mono">{short(data.proxy.implementation)}</span>}
+              </Link>
+              {data.proxy.status === 'verified' || data.proxy.status === 'same-code' ? '' : ', not verified'}
+            </p>
+          )}
         </div>
         {data.codeHash && (
           <div className="ad-fp">
@@ -102,15 +113,21 @@ export function AddressPage() {
 
       {data.status === 'not-a-contract' && (
         <section className="ad-empty">
-          <p>There is no code at this address on the Portaldot V3 testnet. It may be a wallet, or a contract on another chain.</p>
+          <p>No code at this address on Portaldot V3.</p>
+        </section>
+      )}
+
+      {data.status === 'unverified' && data.proxy?.abi && (
+        <section className="ad-section">
+          <h2 className="h3 ad-subhead">Read through {data.proxy.name}</h2>
+          <ReadPanel address={data.address} abi={data.proxy.abi} via={data.proxy.implementation} />
         </section>
       )}
 
       {data.status === 'unverified' && (
         <section className="ad-empty">
           <p>
-            This contract is on chain, but nobody has matched it to source yet. If you have the code, Bytematch can check it
-            now.
+            Nobody has matched this code to source yet.
           </p>
           <Link className="btn btn-primary" to={`/verify?address=${data.address}`}>
             Verify this contract
@@ -177,6 +194,13 @@ export function AddressPage() {
               </dd>
             </div>
             <div>
+              <dt>README badge</dt>
+              <dd>
+                <img className="ad-badge" src={`/badge/${data.address}.svg`} alt={`${v.match} match`} />{' '}
+                <Copy value={`[![source](${location.origin}/badge/${data.address}.svg)](${location.origin}/address/${data.address})`} />
+              </dd>
+            </div>
+            <div>
               <dt>Bundle</dt>
               <dd>
                 <a href={`/v1/contracts/${data.address}/bundle`} download>
@@ -188,8 +212,7 @@ export function AddressPage() {
 
           {v.match === 'partial' && (
             <p className="ad-partial">
-              The executable code matches. The metadata at the end of the bytecode, a hash of the exact source text and file
-              paths, does not. Usually that means comments, formatting or folder layout changed since deployment.
+              The program matches. The metadata hash does not: comments, formatting or file paths changed since deployment.
             </p>
           )}
 
@@ -215,6 +238,9 @@ export function AddressPage() {
               <button role="tab" aria-selected={tab === 'source'} onClick={() => setTab('source')}>
                 Source {files ? `(${Object.keys(files).length} files)` : ''}
               </button>
+              <button role="tab" aria-selected={tab === 'read'} onClick={() => setTab('read')}>
+                Read
+              </button>
               <button role="tab" aria-selected={tab === 'abi'} onClick={() => setTab('abi')}>
                 Functions
               </button>
@@ -237,6 +263,8 @@ export function AddressPage() {
                   {file && files[file] !== undefined && <SolidityView source={files[file]!} />}
                 </div>
               ))}
+
+            {tab === 'read' && <ReadPanel address={data.address} abi={data.abi ?? []} />}
 
             {tab === 'abi' && (
               <ul className="ad-abi">

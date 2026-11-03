@@ -4,7 +4,7 @@ import './codetabs.css';
 
 export interface CodeTab {
   label: string;
-  note: string;
+  note?: string;
   code: string;
 }
 
@@ -30,7 +30,7 @@ export function CodeTabs({ tabs }: { tabs: CodeTab[] }) {
         ))}
       </div>
       <div className="ct-panel" role="tabpanel" id={`${id}-p`} aria-labelledby={`${id}-t${i}`}>
-        <p className="ct-note">{t.note}</p>
+        {t.note && <p className="ct-note">{t.note}</p>}
         <div className="ct-code">
           <pre className="mono">{t.code}</pre>
           <Copy value={t.code} />

@@ -1,0 +1,24 @@
+.rs {
+  background: var(--paper);
+  padding: 9rem 0 8rem;
+}
+
+.rs-title {
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.rs-count {
+  margin: 1.5rem 0 3rem;
+  font-size: var(--t-md);
+  color: var(--muted);
+}
+
+.rs-count .mono {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.rs-more {
+  margin-top: 2.5rem;
+}

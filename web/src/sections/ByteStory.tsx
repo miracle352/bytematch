@@ -1,7 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { plaque } from '../data/plaque';
-import { REGISTRY_ADDRESS } from '../lib/api';
 import { reducedMotion, short } from '../lib/format';
 import { gsap, ScrollTrigger } from '../lib/motion';
 import './bytestory.css';
@@ -10,7 +9,6 @@ const deployed = plaque.deployed.match(/../g)!;
 const rebuilt = plaque.rebuiltElsewhere.match(/../g)!;
 const N = deployed.length;
 const META_START = plaque.metadata.start;
-const META_LEN = plaque.metadata.length;
 const differing = deployed.map((b, i) => (b !== rebuilt[i] ? i : -1)).filter((i) => i >= 0);
 const differSet = new Set(differing);
 
@@ -99,8 +97,7 @@ export function ByteStory() {
       title: 'Read the chain',
       body: (
         <>
-          <span className="mono">eth_getCode</span> returns the {N} bytes stored at{' '}
-          <span className="mono">{short(plaque.address, 6, 4)}</span>. That is all the chain knows about this contract.
+          <span className="mono">eth_getCode</span> returns {N} bytes. That is all the chain knows.
         </>
       ),
     },
@@ -108,32 +105,24 @@ export function ByteStory() {
       title: 'Rebuild from source',
       body: (
         <>
-          The Solidity from the project’s repository is compiled again with solc {plaque.compiler.split('+')[0]}, read from
-          the deployed bytes themselves, and the settings the author used.
+          The repository’s Solidity, compiled again with solc {plaque.compiler.split('+')[0]}.
           <pre className="bs-src mono">{plaque.sourceExcerpt}</pre>
         </>
       ),
     },
     {
-      title: 'Compare byte by byte',
-      body: (
-        <>
-          The first {META_START} bytes are the program. The last {META_LEN} are metadata, a hash of the exact source text
-          and file paths. Built under a different file path, {differing.length} of them differ: the same code with a
-          different fingerprint. That is a partial match.
-        </>
-      ),
+      title: 'Compare',
+      body: <>{differing.length} metadata bytes differ. Same program, different fingerprint: partial.</>,
     },
     {
       title: 'Match every byte',
-      body: <>Rebuilt with the file path the author used, the metadata matches too. Every byte agrees: an exact match.</>,
+      body: <>With the author’s file path, all {N} agree: exact.</>,
     },
     {
       title: 'Record it on chain',
       body: (
         <>
-          The result goes into SourceRegistry on Portaldot, keyed by the code hash. Any contract can call{' '}
-          <span className="mono">check()</span> before it trusts this code.
+          Any contract can now call <span className="mono">check()</span> before it trusts this code.
         </>
       ),
     },
@@ -142,11 +131,7 @@ export function ByteStory() {
   return (
     <section className="bs" id="how" ref={root} aria-label="How Bytematch checks a contract">
       <div className="wrap bs-head">
-        <h2 className="h2">Byte by byte, on a real contract.</h2>
-        <p className="lede">
-          PlaqueLite is a name registry another Hacker House team deployed to the V3 testnet. Here is what Bytematch does
-          with it.
-        </p>
+        <h2 className="h2">Bytematch holds it up to the light.</h2>
       </div>
 
       <div className={`bs-stage ${still ? 'bs-still' : ''}`}>
@@ -185,15 +170,11 @@ export function ByteStory() {
               <span className="bs-differ">
                 <strong ref={(el) => (readout.current.differ = el)}>0</strong> differ
               </span>
-              <span className="bs-legend">
-                <i className="lg-program" /> program <i className="lg-meta" /> metadata
-              </span>
             </figcaption>
             <div className={`bs-stamp ${still || step === 4 ? 'is-on' : ''}`}>
               <span className="state state-exact">Exact match</span>
-              <span className="mono">code hash {short(plaque.codeHash, 10, 6)}</span>
-              <span className="mono">SourceRegistry {short(REGISTRY_ADDRESS, 6, 4)}</span>
-              <Link to={`/address/${plaque.address}`}>Open PlaqueLite</Link>
+              <Link to={`/address/${plaque.address}`}>PlaqueLite</Link>
+              <span className="mono">{short(plaque.codeHash, 10, 6)}</span>
             </div>
           </figure>
         </div>

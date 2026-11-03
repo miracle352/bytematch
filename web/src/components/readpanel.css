@@ -1,0 +1,79 @@
+.rd-values {
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.rd-values > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.35fr) 1fr;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.rd-values dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.rd-values dd {
+  margin: 0;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.rd-reverted {
+  color: var(--unverified);
+}
+
+.rd-calls {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.rd-call {
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+  padding: 1.1rem;
+  border-radius: var(--radius-m);
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.rd-sig {
+  margin: 0;
+  font-weight: 500;
+}
+
+.rd-call input {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--paper);
+  padding: 0.6rem 0.7rem;
+  font-size: 0.72rem;
+  min-width: 0;
+}
+
+.rd-call input:focus {
+  outline: none;
+  border-color: var(--exact);
+}
+
+.rd-call .btn {
+  justify-self: start;
+  padding: 0.5rem 1.1rem;
+  font-size: var(--t-sm);
+}
+
+.rd-out {
+  margin: 0;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.rd-error {
+  color: var(--mismatch);
+}

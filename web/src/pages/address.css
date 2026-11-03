@@ -243,3 +243,23 @@
     white-space: nowrap;
   }
 }
+
+.ad-proxy {
+  margin: 1rem 0 0;
+  color: var(--muted);
+}
+
+.ad-proxy-kind {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.ad-subhead {
+  margin-bottom: 1.2rem;
+}
+
+.ad-badge {
+  display: inline-block;
+  height: 20px;
+  vertical-align: middle;
+}

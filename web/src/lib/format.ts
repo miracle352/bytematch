@@ -22,3 +22,9 @@ export function nibbles(codeHash: string): number[] {
 
 export const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** owner/repo from a GitHub URL or "owner/repo", or null. */
+export function repoOf(s: string): string | null {
+  const m = s.trim().replace(/^https?:\/\//, '').replace(/^(www\.)?github\.com\//, '').match(/^([\w.-]+)\/([\w.-]+?)(?:\.git)?(?:[/?#].*)?$/);
+  return m ? `${m[1]}/${m[2]}` : null;
+}

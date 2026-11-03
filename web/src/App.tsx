@@ -7,6 +7,8 @@ import { Verify } from './pages/Verify';
 import { AddressPage } from './pages/Address';
 import { NetworkPage } from './pages/Network';
 import { NotFound } from './pages/NotFound';
+import { RepoPage } from './pages/Repo';
+import { ReposPage } from './pages/Repos';
 import { ScrollTrigger, scrollToTop, startSmoothScroll } from './lib/motion';
 
 export function App() {
@@ -30,6 +32,8 @@ export function App() {
           <Route path="/verify" element={<Verify />} />
           <Route path="/address/:address" element={<AddressPage />} />
           <Route path="/network" element={<NetworkPage />} />
+          <Route path="/repos" element={<ReposPage />} />
+          <Route path="/repo/:owner/:name" element={<RepoPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

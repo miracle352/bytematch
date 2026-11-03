@@ -12,6 +12,7 @@
   letter-spacing: -0.035em;
   max-width: 20ch;
   text-wrap: balance;
+  margin-bottom: 3.5rem;
 }
 
 /* The two numbers are the headline's data; set them in the byte face. */
@@ -39,7 +40,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 1rem 2rem;
   margin-top: 2.5rem;
   padding-top: 1.5rem;

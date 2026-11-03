@@ -8,19 +8,14 @@ export function Footer() {
   return (
     <footer className="footer">
       <div className="wrap footer-grid">
-        <div>
-          <Link to="/" className="footer-brand">
-            <Logo size={26} />
-            <span>bytematch</span>
-          </Link>
-          <p className="footer-note">
-            Source verification for contracts on Portaldot V3. Built for the Portaldot Hacker House 2026.
-          </p>
-        </div>
+        <Link to="/" className="footer-brand">
+          <Logo size={26} />
+          <span>bytematch</span>
+        </Link>
         <dl className="footer-facts">
           <div>
-            <dt>Network</dt>
-            <dd>Portaldot V3 testnet, chain 420420777</dd>
+            <dt>Portaldot V3 testnet</dt>
+            <dd className="mono">chain 420420777</dd>
           </div>
           <div>
             <dt>SourceRegistry</dt>
@@ -28,20 +23,16 @@ export function Footer() {
               <span className="mono">{REGISTRY_ADDRESS}</span> <Copy value={REGISTRY_ADDRESS} />
             </dd>
           </div>
-          <div>
-            <dt>Etherscan-compatible API</dt>
-            <dd className="mono">{typeof window !== 'undefined' ? `${window.location.origin}/api` : '/api'}</dd>
-          </div>
         </dl>
         <nav className="footer-links" aria-label="Footer">
-          <Link to="/verify">Verify a contract</Link>
-          <Link to="/network">All contracts</Link>
-          <Link to="/#how">How it works</Link>
+          <Link to="/repos">Repositories</Link>
+          <Link to="/network">Network</Link>
+          <Link to="/verify">Verify</Link>
+          <a href="/llms.txt">llms.txt</a>
+          <a href="https://github.com/miracle352/bytematch">GitHub</a>
         </nav>
       </div>
-      <p className="wrap footer-credit">
-        Photograph: keypunch operator, 1950 US Census. U.S. Census Bureau, public domain.
-      </p>
+      <p className="wrap footer-credit">Photograph: 1950 US Census, U.S. Census Bureau, public domain.</p>
     </footer>
   );
 }

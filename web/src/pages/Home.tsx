@@ -1,7 +1,7 @@
 import { Hero } from '../sections/Hero';
 import { CardStory } from '../sections/CardStory';
 import { ByteStory } from '../sections/ByteStory';
-import { ClaimCheck } from '../sections/ClaimCheck';
+import { RepoSection } from '../sections/RepoSection';
 import { NetworkSection } from '../sections/NetworkSection';
 import { RunIt } from '../sections/RunIt';
 
@@ -11,8 +11,8 @@ export function Home() {
       <Hero />
       <CardStory />
       <ByteStory />
+      <RepoSection />
       <NetworkSection />
-      <ClaimCheck />
       <RunIt />
     </>
   );
