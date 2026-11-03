@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAddress, repoOf } from '../lib/format';
 import './search.css';
@@ -36,6 +36,7 @@ export function Omnibox({ autoFocus = false, typing = false }: { autoFocus?: boo
   const [value, setValue] = useState('');
   const [focused, setFocused] = useState(false);
   const placeholder = useTypedPlaceholder(typing && !focused && !value);
+  const id = useId();
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -50,11 +51,11 @@ export function Omnibox({ autoFocus = false, typing = false }: { autoFocus?: boo
 
   return (
     <form className="search" onSubmit={submit} role="search">
-      <label htmlFor="omnibox" className="visually-hidden">
+      <label htmlFor={id} className="visually-hidden">
         Contract address or GitHub repository
       </label>
       <input
-        id="omnibox"
+        id={id}
         className="mono"
         value={value}
         onChange={(e) => {
@@ -69,13 +70,13 @@ export function Omnibox({ autoFocus = false, typing = false }: { autoFocus?: boo
         autoCapitalize="off"
         autoFocus={autoFocus}
         aria-invalid={!!error}
-        aria-describedby={error ? 'omnibox-error' : undefined}
+        aria-describedby={error ? `${id}-error` : undefined}
       />
       <button className="btn btn-primary" type="submit">
         Check
       </button>
       {error && (
-        <p id="omnibox-error" className="search-error" role="alert">
+        <p id={`${id}-error`} className="search-error" role="alert">
           {error}
         </p>
       )}
