@@ -104,6 +104,14 @@ export class Chain {
     });
   }
 
+  async call(to: string, data: string): Promise<Hex> {
+    return this.rpc<Hex>('eth_call', [{ to, data }, 'latest']);
+  }
+
+  async storageAt(address: string, slot: string): Promise<Hex> {
+    return this.rpc<Hex>('eth_getStorageAt', [address, slot, 'latest']);
+  }
+
   async chainId(): Promise<number> {
     return Number(await this.rpc<Hex>('eth_chainId', []));
   }

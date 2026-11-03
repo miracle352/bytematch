@@ -27,6 +27,18 @@
       "destination": "/api/index?__path=/health"
     },
     {
+      "source": "/mcp",
+      "destination": "/api/index?__path=/mcp"
+    },
+    {
+      "source": "/llms.txt",
+      "destination": "/api/index?__path=/llms.txt"
+    },
+    {
+      "source": "/badge/:file",
+      "destination": "/api/index?__path=/badge/:file"
+    },
+    {
       "source": "/((?!assets/|img/|fonts/|favicon).*)",
       "destination": "/index.html"
     }

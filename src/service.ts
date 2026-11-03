@@ -10,6 +10,7 @@ import type { ContractRecord, Store } from './store.js';
 import { strip0x } from './bytecode.js';
 import { inputFromMetadata, verify, verifyAuto, VerifyError, type Verification } from './verify.js';
 import type { StandardJsonInput } from './compiler.js';
+import { httpFetcher, scanRepository, type Fetcher, type RepoReport } from './repo.js';
 
 export type Submission =
   | { kind: 'standard-json'; address: string; input: StandardJsonInput; contract?: string; compilerVersion?: string }
@@ -85,6 +86,34 @@ export class Bytematch {
     return { status: 'unverified', address, codeHash, record: null };
   }
 
+  /**
+   * Find a repository's deployed contracts and verify every one that matches its source.
+   * The report is kept, so repositories can be listed and compared.
+   */
+  async scanRepo(url: string, fetcher: Fetcher = httpFetcher()): Promise<RepoReport> {
+    const { report, matches } = await scanRepository(this.chain, url, fetcher, this.log);
+    for (const m of matches) {
+      try {
+        await this.submit({ kind: 'standard-json', address: m.address, input: m.input, contract: m.contract, compilerVersion: m.compilerVersion });
+      } catch (e) {
+        this.log(`${report.repo}: saving ${m.address} failed: ${describeError(e)}`);
+      }
+    }
+    await this.store.cacheSet(`repo:${report.repo.toLowerCase()}`, report, REPO_TTL);
+    const index = (await this.store.cacheGet<RepoSummary[]>('repos:index')) ?? [];
+    const summary = summarise(report);
+    await this.store.cacheSet('repos:index', [summary, ...index.filter((r) => r.repo.toLowerCase() !== report.repo.toLowerCase())], REPO_TTL);
+    return report;
+  }
+
+  async repoReport(repo: string): Promise<RepoReport | null> {
+    return this.store.cacheGet<RepoReport>(`repo:${repo.toLowerCase()}`);
+  }
+
+  async repoIndex(): Promise<RepoSummary[]> {
+    return (await this.store.cacheGet<RepoSummary[]>('repos:index')) ?? [];
+  }
+
   /** Etherscan-style async flow: returns a job id immediately, verifies in the background. */
   async submitJob(s: Submission): Promise<string> {
     const id = randomUUID().replace(/-/g, '');
@@ -96,6 +125,31 @@ export class Bytematch {
     );
     return id;
   }
+}
+
+const REPO_TTL = 365 * 86_400;
+
+export interface RepoSummary {
+  repo: string;
+  url: string;
+  scannedAt: string;
+  contracts: number;
+  exact: number;
+  partial: number;
+  differ: number;
+}
+
+export function summarise(r: RepoReport): RepoSummary {
+  const count = (s: string) => r.contracts.filter((c) => c.status === s).length;
+  return {
+    repo: r.repo,
+    url: r.url,
+    scannedAt: r.scannedAt,
+    contracts: r.contracts.length,
+    exact: count('exact'),
+    partial: count('partial'),
+    differ: count('no_match'),
+  };
 }
 
 export function describeError(e: unknown): string {

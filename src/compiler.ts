@@ -1,6 +1,7 @@
 // Fetches and runs official solc builds (soljson) from binaries.soliditylang.org.
 // Builds are cached on disk; a few stay loaded in memory since each is ~8 MB of wasm.
 
+import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -126,17 +127,29 @@ async function load(longVersion: string): Promise<SolcInstance> {
  * Compile a standard JSON input. Output selection is replaced (it does not affect
  * bytecode) and imports are never read from disk: every file must be in `sources`.
  */
+// Verifying a repository compiles the same input once per deployed contract; remember
+// the last few outputs so only the first compile costs anything.
+const outputs = new Map<string, CompilerOutput>();
+const MAX_OUTPUTS = 8;
+
 export async function compile(version: string, input: StandardJsonInput): Promise<CompilerOutput> {
   const longVersion = await resolveVersion(version);
-  const solc = await load(longVersion);
   const prepared: StandardJsonInput = {
     ...input,
     settings: { ...input.settings, outputSelection: { '*': { '*': OUTPUTS } } },
   };
-  const raw = solc.compile(JSON.stringify(prepared), {
+  const json = JSON.stringify(prepared);
+  const key = `${longVersion}:${createHash('sha256').update(json).digest('hex')}`;
+  const hit = outputs.get(key);
+  if (hit) return hit;
+  const solc = await load(longVersion);
+  const raw = solc.compile(json, {
     import: (path) => ({ error: `${path} was imported but not included in the submitted sources` }),
   });
-  return JSON.parse(raw) as CompilerOutput;
+  const out = JSON.parse(raw) as CompilerOutput;
+  outputs.set(key, out);
+  while (outputs.size > MAX_OUTPUTS) outputs.delete(outputs.keys().next().value!);
+  return out;
 }
 
 export function compileErrors(out: CompilerOutput): string[] {
