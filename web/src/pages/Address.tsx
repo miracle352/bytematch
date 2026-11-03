@@ -189,7 +189,8 @@ export function AddressPage() {
                 {data.onChain && data.onChain.level !== 'none' ? (
                   data.onChain.via === 'roots' ? (
                     <>
-                      Yes, under SourceRoots root <span className="mono">{short(data.onChain.root ?? '', 8, 6)}</span>{' '}
+                      Yes, in SourceRoots root <span className="mono">{short(data.onChain.root ?? '', 8, 6)}</span>
+                      {data.onChain.block ? `, block ${data.onChain.block.toLocaleString('en-US')}` : ''}. Proof{' '}
                       <Copy value={JSON.stringify({ level: data.onChain.level === 'exact' ? 2 : 1, sourceDigest: data.onChain.sourceDigest, proof: data.onChain.proof })} />
                     </>
                   ) : (

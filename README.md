@@ -287,7 +287,7 @@ It builds, deploys, verifies itself and writes `deployments/portaldot-testnet.js
 ## Limits
 
 - EVM bytecode only. PolkaVM contracts (built with `resolc`) are detected and reported,
-  not verified. On V3 today that's one contract in 126.
+  not verified. On V3 today that's 5 contracts in 241.
 - Solidity only, no Vyper.
 - Contracts created by other contracts or by native extrinsics are verified on runtime
   code; constructor arguments are then unknown.
@@ -296,6 +296,17 @@ It builds, deploys, verifies itself and writes `deployments/portaldot-testnet.js
   JSON input.
 - Compilation runs on the API process. Fine for a testnet; a busy deployment should
   move it to worker threads.
+- Repository checks run inside one Vercel function call, so they stop at 5 minutes;
+  one Hacker House repository in 74 is larger than that. Repositories are read from
+  GitHub's public archive, so private repositories need `GITHUB_TOKEN`.
+- Rate limits (3 repository checks and 10 verifications a minute per client) are kept in
+  memory per function instance, so they are approximate.
+- The public Portaldot RPC answers 503 under load. Every call retries with backoff,
+  but a long outage shows up as an error.
+- SourceRoots is updated by running `publish:root` where the attester key is. A
+  verification made after the latest root shows as verified on the site but not yet on
+  chain until the next publish. SourceRegistry (one slot per program) is the first
+  version and still answers `check` for the 17 programs attested there.
 
 ## License
 

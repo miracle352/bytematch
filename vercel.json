@@ -39,7 +39,7 @@
       "destination": "/api/index?__path=/badge/:file"
     },
     {
-      "source": "/((?!assets/|img/|fonts/|favicon).*)",
+      "source": "/((?!assets/|img/|fonts/|favicon|og\\.jpg).*)",
       "destination": "/index.html"
     }
   ]

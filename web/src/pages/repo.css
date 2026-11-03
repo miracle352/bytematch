@@ -223,3 +223,17 @@
 
   .rp-table .rp-h-mismatch { width: 3.4rem; }
 }
+
+.rp-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0 0 1rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.rp-badges .copy {
+  background: var(--exact);
+  color: #fff;
+}

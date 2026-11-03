@@ -43,8 +43,7 @@ export function NetworkPage() {
     <div className="page wrap nw">
       <h1 className="page-title">Every contract on Portaldot V3</h1>
       <p className="lede">
-        {t.verified + t.sameCode} of {t.contracts} have source anyone can check.{' '}
-        {live ? `Read from the chain ${ago(data.updatedAt)}.` : `Snapshot from ${ago(data.updatedAt)}.`}
+        {t.verified + t.sameCode} of {t.contracts} can be checked.
       </p>
 
       <PunchCard rows={data.contracts} caption={`${t.verified + t.sameCode} of ${t.contracts} contracts verified`} />

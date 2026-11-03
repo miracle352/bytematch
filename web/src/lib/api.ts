@@ -29,7 +29,7 @@ export interface ContractLookup {
   codeHash: string | null;
   verification: Verification | null;
   abi: AbiItem[] | null;
-  onChain: { level: 'none' | 'partial' | 'exact'; sourceDigest: string; via?: 'registry' | 'roots'; root?: string; proof?: string[] } | null;
+  onChain: { level: 'none' | 'partial' | 'exact'; sourceDigest: string; via?: 'registry' | 'roots'; root?: string; proof?: string[]; tx?: string; block?: number } | null;
   proxy: { kind: 'eip1967' | 'beacon' | 'eip1167'; implementation: string; status: LookupStatus | null; name: string | null; abi: AbiItem[] | null } | null;
 }
 
@@ -150,3 +150,4 @@ export const api = {
 };
 
 export const REGISTRY_ADDRESS = '0x6aea3b20e67e8b5b660d0d8eb917c790e190a203';
+export const ROOTS_ADDRESS = '0x0f9691a6aae5d9b5ed7190551049ced18b8ed086';

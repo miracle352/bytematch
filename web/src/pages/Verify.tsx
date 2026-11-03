@@ -130,10 +130,9 @@ export function Verify() {
     <div className="page wrap vf">
       <div className="vf-intro">
         <h1 className="page-title">Verify a contract</h1>
-        <p className="lede">
-          Bytematch compiles your source and compares it with the code at the address. It takes a few seconds, or up to a
-          minute when it has to work out your compiler settings.
-        </p>
+        <Link to="/repos" className="vf-repo">
+          Or check a whole repository
+        </Link>
       </div>
 
       <form className="vf-form" onSubmit={submit}>
@@ -182,11 +181,11 @@ export function Verify() {
                 Choose .sol files
                 <input type="file" className="visually-hidden" accept=".sol" multiple onChange={(e) => onPick(e.target.files)} />
               </label>
-              <span className="vf-hint">
-                {project
-                  ? `${fileCount} Solidity files picked${project.foundry ? ', Foundry project' : ''}.`
-                  : 'Pick the whole project so imports like OpenZeppelin can be found. Only the files your contract imports are sent.'}
-              </span>
+              {project && (
+                <span className="vf-hint">
+                  {fileCount} Solidity files{project.foundry ? ', Foundry project' : ''}
+                </span>
+              )}
             </div>
 
             {project && (
@@ -225,12 +224,6 @@ export function Verify() {
                   <input type="checkbox" checked={knowSettings} onChange={(e) => setKnowSettings(e.target.checked)} />
                   I know the compiler settings I deployed with
                 </label>
-                {!knowSettings && (
-                  <p className="vf-hint">
-                    Leave this off and Bytematch reads the compiler version from the deployed bytes and tries the common
-                    settings.
-                  </p>
-                )}
                 {knowSettings && (
                   <div className="vf-row vf-row-4">
                     <label className="vf-field">
@@ -292,10 +285,7 @@ export function Verify() {
                   }}
                 />
               </label>
-              <span className="vf-hint">
-                {jsonName ||
-                  'Hardhat writes these to artifacts/build-info/. They reproduce your build exactly, so they give exact matches.'}
-              </span>
+              {jsonName && <span className="vf-hint">{jsonName}</span>}
             </div>
             <label className="vf-field">
               <span>Contract (optional)</span>

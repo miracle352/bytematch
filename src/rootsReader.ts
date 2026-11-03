@@ -16,11 +16,13 @@ export interface RootsAttestation extends OnChainAttestation {
   via: 'registry' | 'roots';
   root?: string;
   proof?: string[];
+  tx?: string;
+  block?: number;
 }
 
 export class RootsReader {
   readonly contract: Contract;
-  private cache: { at: number; tree: RootTree | null; root: string } | null = null;
+  private cache: { at: number; tree: RootTree | null; root: string; tx?: string; block?: number } | null = null;
 
   constructor(
     readonly provider: JsonRpcProvider,
@@ -36,24 +38,28 @@ export class RootsReader {
     if (this.cache && Date.now() - this.cache.at < 60_000) return this.cache.tree;
     const root = (await this.contract.getFunction('roots').staticCall(this.attester, 0)) as string;
     let tree: RootTree | null = null;
+    let tx: string | undefined;
+    let block: number | undefined;
     if (!/^0x0{64}$/.test(root)) {
       const logs = await this.contract.queryFilter(this.contract.filters.RootPublished!(this.attester, root), this.fromBlock, 'latest');
       // args[2] is `entries`; by name it would collide with Array.prototype.entries
-      const log = logs.at(-1) as { args?: unknown[] } | undefined;
+      const log = logs.at(-1) as { args?: unknown[]; transactionHash?: string; blockNumber?: number } | undefined;
+      tx = log?.transactionHash;
+      block = log?.blockNumber;
       if (log?.args) {
         tree = new RootTree(RootTree.unpack(log.args[2] as string));
         if (tree.root !== root.toLowerCase()) tree = null; // never serve proofs for a tree that doesn't match
       }
     }
-    this.cache = { at: Date.now(), tree, root };
+    this.cache = { at: Date.now(), tree, root, tx, block };
     return tree;
   }
 
-  async entry(codeHash: string): Promise<{ entry: RootEntry; proof: string[]; root: string } | null> {
+  async entry(codeHash: string): Promise<{ entry: RootEntry; proof: string[]; root: string; tx?: string; block?: number } | null> {
     const tree = await this.tree();
     const entry = tree?.find(codeHash);
     if (!tree || !entry) return null;
-    return { entry, proof: tree.proof(entry)!, root: tree.root };
+    return { entry, proof: tree.proof(entry)!, root: tree.root, tx: this.cache?.tx, block: this.cache?.block };
   }
 }
 
@@ -68,7 +74,7 @@ export function onChainReader(registry: { read(target: string): Promise<OnChainA
         const code = await roots.provider.getCode(target);
         if (code !== '0x') {
           const hit = await roots.entry(keccak256(code)).catch(() => null);
-          if (hit) return { level: LEVEL_NAME[hit.entry.level], sourceDigest: hit.entry.sourceDigest, via: 'roots', root: hit.root, proof: hit.proof };
+          if (hit) return { level: LEVEL_NAME[hit.entry.level], sourceDigest: hit.entry.sourceDigest, via: 'roots', root: hit.root, proof: hit.proof, tx: hit.tx, block: hit.block };
         }
       }
       return { level: 'none', sourceDigest: '0x' + '00'.repeat(32), via: 'registry' };

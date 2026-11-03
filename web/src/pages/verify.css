@@ -242,3 +242,11 @@
     grid-template-columns: 1fr;
   }
 }
+
+.vf-repo {
+  display: inline-block;
+  margin-top: 1.6rem;
+  font-weight: 600;
+  color: var(--exact);
+  text-underline-offset: 4px;
+}

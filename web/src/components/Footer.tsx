@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { REGISTRY_ADDRESS } from '../lib/api';
+import { ROOTS_ADDRESS } from '../lib/api';
 import { Logo } from './Logo';
 import { Copy } from './Copy';
 import './footer.css';
@@ -18,9 +18,9 @@ export function Footer() {
             <dd className="mono">chain 420420777</dd>
           </div>
           <div>
-            <dt>SourceRegistry</dt>
+            <dt>SourceRoots</dt>
             <dd>
-              <span className="mono">{REGISTRY_ADDRESS}</span> <Copy value={REGISTRY_ADDRESS} />
+              <span className="mono">{ROOTS_ADDRESS}</span> <Copy value={ROOTS_ADDRESS} />
             </dd>
           </div>
         </dl>

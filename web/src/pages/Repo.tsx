@@ -4,6 +4,7 @@ import { api, ApiError, type RepoReport, type RepoStatus } from '../lib/api';
 import { ago, bytes, short } from '../lib/format';
 import './page.css';
 import './repo.css';
+import { Copy } from '../components/Copy';
 
 export const REPO_STATE: Record<RepoStatus, { text: string; cls: string }> = {
   exact: { text: 'Exact match', cls: 'state-exact' },
@@ -133,6 +134,17 @@ export function RepoPage() {
             </li>
           ))}
         </ul>
+        {report.contracts.some((c) => c.status === 'exact' || c.status === 'partial') && (
+          <p className="rp-badges">
+            README badges for every match{' '}
+            <Copy
+              value={report.contracts
+                .filter((c) => c.status === 'exact' || c.status === 'partial')
+                .map((c) => `[![${c.name ?? c.address}](${location.origin}/badge/${c.address}.svg)](${location.origin}/address/${c.address})`)
+                .join('\n')}
+            />
+          </p>
+        )}
         <p className="rp-when">
           Checked {ago(report.scannedAt)} ·{' '}
           <button className="rp-again" onClick={scan} disabled={scanning}>
