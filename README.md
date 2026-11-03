@@ -1,67 +1,93 @@
 # Bytematch
 
-Source verification for contracts on Portaldot V3.
+**Every contract claims a source. Bytematch checks it.**
 
-**Live:** https://bytematch-portaldot.vercel.app · **Agents:** `claude mcp add --transport http bytematch https://bytematch-portaldot.vercel.app/mcp` · [`/llms.txt`](https://bytematch-portaldot.vercel.app/llms.txt)
+[![SourceRoots: source verified](https://bytematch-portaldot.vercel.app/badge/0x0f9691a6aae5d9b5ed7190551049ced18b8ed086.svg)](https://bytematch-portaldot.vercel.app/address/0x0f9691a6aae5d9b5ed7190551049ced18b8ed086)
+[![SourceRegistry: source verified](https://bytematch-portaldot.vercel.app/badge/0x6aea3b20e67e8b5b660d0d8eb917c790e190a203.svg)](https://bytematch-portaldot.vercel.app/address/0x6aea3b20e67e8b5b660d0d8eb917c790e190a203)
 
-Portaldot V3 runs Solidity through pallet-revive and accepts plain EVM bytecode. Of the
-126 contract code blobs on the V3 testnet when this project started, 125 were EVM
-bytecode compiled with ordinary `solc`; one was PolkaVM. None of them can be checked
-against source anywhere: the official explorers index the Substrate side and have no
-contract verification, and there is no Etherscan for this chain.
+[![Bytematch](https://bytematch-portaldot.vercel.app/og.jpg)](https://bytematch-portaldot.vercel.app)
 
-So when a hackathon README says "deployed at 0x…", nobody can tell whether that code is
-the code in the repo. Bytematch answers that, and writes the answer on chain where
-other contracts can read it.
+There are 242 contracts on the Portaldot V3 testnet. When this project started, the
+source of exactly **none** of them could be checked: no Etherscan, no Sourcify, and the
+official explorers only index the Substrate side. Every "deployed at `0x…`" in every
+README was taken on faith.
+
+Today **118** of them can be checked, byte for byte, and the results are on chain.
+
+**[bytematch-portaldot.vercel.app](https://bytematch-portaldot.vercel.app)**
+
+## Try it in ten seconds
+
+Paste an address or a GitHub repository into the box on the site. Or:
+
+```sh
+# a whole repository: finds what it deployed, verifies all of it
+curl -X POST https://bytematch-portaldot.vercel.app/v1/repos -d '{"url": "https://github.com/Junedkhan121/portalswap"}'
+
+# one contract
+curl https://bytematch-portaldot.vercel.app/v1/contracts/0x5432e6b89dc3042d47f2be98e971cad9dabab685
+
+# your agent
+claude mcp add --transport http bytematch https://bytematch-portaldot.vercel.app/mcp
+```
+
+Already deployed with Foundry or Hardhat? `forge verify-contract` and `hardhat verify`
+work against Bytematch unchanged ([setup](#foundry)).
+
+## We pointed it at the whole hackathon
+
+Every Portaldot Hacker House 2026 submission with a GitHub repository, 74 of them, went
+through `POST /v1/repos` with nothing but its URL. No settings, no contract names, no
+help from the teams.
+
+| | |
+|---|---|
+| Repositories read | **74** |
+| …that point at contracts deployed on V3 | **56** |
+| …with at least one contract matched to source | **47** |
+| …where *every* deployed contract matched | **38** |
+| Exact matches (every byte, metadata included) | **49** |
+| Partial matches (same code, different metadata) | **53** |
+| Deployed contracts that don't match the repository | **34** |
+
+The 34 are the interesting ones. Some are tokens a project uses but didn't write. Others
+are contracts the repository moved past after deploying: DotProof's `LendingMarket`
+was deployed before later fixes, and its own `SECURITY.md` says so. The README and the
+chain both looked fine. Only one of them describes the code that holds the funds.
+
+`GET /v1/repos` and `GET /v1/network` have the live figures.
 
 ## What it does
 
-- **Verifies deployed bytecode against Solidity source.** It compiles with the official
-  solc builds and compares against `eth_getCode`, reporting an **exact** match (byte for
-  byte, metadata included, so the source text is proven) or a **partial** match (same
-  executable code; comments, file paths or metadata settings differ).
+- **Exact or partial, never "trust me".** Compiles with the official solc builds and
+  compares against `eth_getCode`. **Exact** means every byte matches, metadata included,
+  so the source text itself is proven. **Partial** means the same executable code with
+  different comments, paths or metadata settings.
+- **A whole repository from one URL.** Reads the repo without running any of its code,
+  finds its Foundry and Hardhat projects and their settings, collects every address it
+  mentions that has code on chain, and verifies each one. npm dependencies at the
+  lockfile versions, git submodules at their pinned commits, Foundry remappings honoured.
 - **Finds the deploy transaction by itself.** Portaldot has no contract-creation lookup
-  and the public indexers start partway through the chain, but the RPC keeps historical
-  state. Bytematch searches `eth_getCode` over block heights (8 probes per round, ~3s
-  for 250k blocks), then matches the creation input to recover constructor arguments.
-- **Works from just the `.sol` file.** If you don't know your settings, it reads the
-  compiler version and metadata type from the deployed bytecode and searches the
-  settings people actually deploy with. Sources that can't match are rejected in about
-  a second by checking function selectors against the deployed code.
-- **Verifies a whole repository from its URL.** Paste `github.com/owner/repo`: Bytematch
-  reads the repository (never running its code), finds the Foundry or Hardhat projects
-  in it and their settings, collects every address the repository mentions that has code
-  on chain, and compiles and compares each one. npm dependencies come from the lockfile
-  versions, git submodules from their pinned commits, Foundry remappings are honoured.
-- **Reads verified contracts live.** Every public value, any view function with
-  arguments, and proxies (EIP-1967, beacon, EIP-1167 clones) read through their
-  implementation's verified ABI.
-- **Serves agents as well as people.** An MCP endpoint (`/mcp`) with five tools, and
-  `/llms.txt` describing the whole service in one page.
-- **README badges.** `/badge/<address>.svg` shows the live match state.
-- **Speaks the Etherscan API.** `forge verify-contract` and `hardhat verify` work
-  against it without a plugin.
-- **Attests on chain.** `SourceRegistry` records each result under the contract's
-  runtime code hash, read from the live contract at attestation time. Any contract can
-  call `check(target, attester)`, for example to accept only tokens with verified source.
+  and the indexers start partway through the chain, so Bytematch searches historical
+  `eth_getCode` (8 probes a round, ~3s for 250k blocks) and recovers constructor
+  arguments from the creation input.
+- **Works from a single `.sol` file.** Reads the compiler version and metadata mode from
+  the deployed bytes and searches the settings people actually deploy with. Sources that
+  can't match are rejected in about a second by checking function selectors.
+- **Records on chain for ~0.01 POT a contract.** One storage slot per contract would cost
+  ~9 POT; the hackathon allowance is 500. [SourceRoots](#sourceroots-on-chain-records-at-about-001-pot-a-contract)
+  keeps every result under one Merkle root, rebuildable from the chain alone, and any
+  contract can gate on it with a proof.
+- **Reads what it verifies.** Every public value live, any view function, and proxies
+  (EIP-1967, beacon, EIP-1167 clones) read through their implementation's verified ABI.
+- **Built for agents too.** An MCP endpoint with five tools, and `/llms.txt` describing the
+  whole service in one page.
+- **Badges.** `/badge/<address>.svg` shows the live state, like the ones at the top of
+  this page.
+- **Speaks Etherscan.** `forge verify-contract` and `hardhat verify` work without a plugin.
 
-## Results on the V3 testnet
-
-Every Portaldot Hacker House 2026 submission with a GitHub repository (74 of 75) was
-put through `POST /v1/repos`, with nothing but its URL:
-
-- 73 repositories read; 55 of them name contracts that are deployed on the V3 testnet.
-- 46 of those 55 have at least one contract matched to their source: **49 exact and
-  44 partial matches**, found and verified automatically.
-- 29 deployed contracts did not match the repository as it is now (often the
-  repository moved on after deploying, or the address is a token the project only uses).
-- One repository timed out on Vercel's 5-minute function limit.
-
-Across the chain, 108 of 240 contracts now have source anyone can check (94 verified
-directly, 14 by sharing code with a verified contract). `GET /v1/repos` and
-`GET /v1/network` give the live figures.
-
-Earlier, hand-picked checks, with the settings recorded in each repository:
+<details>
+<summary>Hand-picked checks from before the repository scanner, with each project's recorded settings</summary>
 
 | Project | Contract | Address | Result |
 |---|---|---|---|
@@ -87,6 +113,9 @@ picked the matching contract for each address.
 The DotProof "no match" row is the tool working as intended. DotProof's own `SECURITY.md` says those
 contracts were deployed before later fixes and are immutable, so the repository no
 longer describes the code on chain.
+
+
+</details>
 
 ## How matching works
 
@@ -153,7 +182,7 @@ match. Foundry 1.x refuses `--verifier etherscan` for chains it doesn't know; us
 forge verify-contract <address> src/Vault.sol:Vault \
   --chain 420420777 \
   --verifier custom \
-  --verifier-url https://<bytematch-host>/api \
+  --verifier-url https://bytematch-portaldot.vercel.app/api \
   --verifier-api-key unused \
   --watch
 ```
@@ -166,7 +195,7 @@ etherscan: {
   customChains: [{
     network: 'portaldot',
     chainId: 420420777,
-    urls: { apiURL: 'https://<bytematch-host>/api', browserURL: 'https://<bytematch-host>' },
+    urls: { apiURL: 'https://bytematch-portaldot.vercel.app/api', browserURL: 'https://bytematch-portaldot.vercel.app' },
   }],
 },
 ```
