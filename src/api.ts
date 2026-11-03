@@ -96,7 +96,7 @@ const clientOf = (c: Context) => c.req.header('x-real-ip') ?? c.req.header('x-fo
 
 export function createApp(
   app: Bytematch,
-  info: { registry: string | null; network?: NetworkIndex; reader?: { read(target: string): Promise<OnChainAttestation> } | null },
+  info: { registry: string | null; roots?: string | null; network?: NetworkIndex; reader?: { read(target: string): Promise<OnChainAttestation> } | null },
 ) {
   const api = new Hono();
   api.use('*', cors());
@@ -109,6 +109,7 @@ export function createApp(
       chainId: await app.chain.chainId().catch(() => null),
       block,
       registry: info.registry,
+      roots: info.roots ?? null,
       attester: app.attester?.address ?? null,
     });
   });

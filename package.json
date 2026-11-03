@@ -18,7 +18,9 @@
     "attest:all": "tsx scripts/attest-all.ts",
     "seed:remote": "tsx scripts/seed-remote.ts",
     "dev:web": "npm run dev --prefix web",
-    "attest:remote": "tsx scripts/attest-remote.ts"
+    "attest:remote": "tsx scripts/attest-remote.ts",
+    "deploy:roots": "tsx scripts/deploy-roots.ts",
+    "publish:root": "tsx scripts/publish-root.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
