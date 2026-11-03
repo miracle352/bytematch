@@ -386,6 +386,7 @@ Written during the Portaldot Hacker House (Oct–Nov 2026). Third-party pieces i
 - [React](https://react.dev), [Vite](https://vitejs.dev), [GSAP](https://gsap.com), [Lenis](https://github.com/darkroomengineering/lenis); fonts Schibsted Grotesk and Martian Mono via [Fontsource](https://fontsource.org)
 - [Vitest](https://vitest.dev) and [@ethereumjs/vm](https://github.com/ethereumjs/ethereumjs-monorepo) for tests; [Foundry](https://getfoundry.sh) and [hardhat-verify](https://github.com/NomicFoundation/hardhat) for end-to-end checks
 - Photograph: keypunch operator, 1950 US Census, U.S. Census Bureau, public domain
+- Demo film: made with [HyperFrames](https://github.com/heygen-com/hyperframes); narration by Kokoro-82M, run locally; music “Ambient Voyager” by Zeropage (CC BY, via Jamendo)
 
 ## License
 
@@ -400,11 +401,13 @@ block explorer, so each contract's Bytematch page is linked as its explorer page
 |---|---|---|
 | **SourceRoots** (current on-chain record) | [`0x0f9691a6aae5d9b5ed7190551049ced18b8ed086`](https://bytematch-portaldot.vercel.app/address/0x0f9691a6aae5d9b5ed7190551049ced18b8ed086), verified exact through `forge verify-contract` | 306369 |
 | SourceRoots deploy | `0xb9fffafd15f0171c8f4aee75ca2545bad51c2d45e73a300a650f025800a8515e` | 306369 |
-| Root 2, 99 programs (current) | `0x2356eef3e58565e536bc6d1369cfc37132830319e81c4ed0c1953385e5609714` | 306689 |
+| Root 3, 100 programs (current), 0.033 POT | `0x8d2de9cf9c3be4829dd4dc6346a452ccca13558ac04b5b5dcaf19505a5fcd6f9` | 308025 |
+| Root 2, 99 programs | `0x2356eef3e58565e536bc6d1369cfc37132830319e81c4ed0c1953385e5609714` | 306689 |
 | Root 1, 89 programs | `0x0a581a6e11fe3a72f59cea49e9618d9d8679922154c734a67c585c72f283f275` | 306374 |
 | SourceRegistry (first version, one slot per program) | [`0x6aea3b20e67e8b5b660d0d8eb917c790e190a203`](https://bytematch-portaldot.vercel.app/address/0x6aea3b20e67e8b5b660d0d8eb917c790e190a203), verified exact | 244720 |
 | SourceRegistry deploy | `0x079662fa74d68780d31bf9b21980cfda10da1e58d9004b3c83a8b1567436bb3d` | 244720 |
 | SourceRegistry attestations (17) | `0xb0037034dc21658f01c16fbcb8d459baabced4e6766fc41d1701ae7700ad3426` … `0xcab5cfe37b867b13602768d310f3128879f7f0fc9b291c07e040a613279210b4` | 244727–244746 |
+| Demo contract [`Hello`](examples/hello), deployed and verified live for the demo film | [`0xBDe6abB5a5075b65A522446FF2bF371148D53859`](https://bytematch-portaldot.vercel.app/address/0xbde6abb5a5075b65a522446ff2bf371148d53859), deploy `0xf60367b8fde9136e94c6dfb5f52dea1c3760dcbfdd44d9d847d681fec2010fe1`; `SourceRoots.check` returns 2 | 308010 |
 | Attester | `0x8d375990766be8a0d1e1a93e6f9fa33ac2023ff3` (Substrate `5FFs3veWqFTWM2h2aya9mKi7HhBKz6Hdk8LsPnUnV6M61dCA`) | |
 
 Details in [`deployments/portaldot-testnet.json`](deployments/portaldot-testnet.json).

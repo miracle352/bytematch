@@ -40,5 +40,20 @@
       }
     },
     "source": "contracts/SourceRoots.sol"
+  },
+  "demo": {
+    "Hello": {
+      "address": "0xbde6abb5a5075b65a522446ff2bf371148d53859",
+      "tx": "0xf60367b8fde9136e94c6dfb5f52dea1c3760dcbfdd44d9d847d681fec2010fe1",
+      "block": 308010,
+      "source": "examples/hello/src/Hello.sol",
+      "verification": "exact, via forge verify-contract against the live site"
+    },
+    "rootPublish": {
+      "tx": "0x8d2de9cf9c3be4829dd4dc6346a452ccca13558ac04b5b5dcaf19505a5fcd6f9",
+      "block": 308025,
+      "programs": 100,
+      "costPOT": 0.0326
+    }
   }
 }
