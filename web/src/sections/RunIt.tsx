@@ -6,7 +6,7 @@ import './runit.css';
 const ATTESTER = '0x8d375990766be8a0d1e1a93e6f9fa33ac2023ff3';
 
 export function RunIt() {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://bytematch-opal.vercel.app';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://bytematch-portaldot.vercel.app';
   const tabs = [
     {
       label: 'Agents',

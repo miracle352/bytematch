@@ -2,8 +2,8 @@
 // the attester key. The deployment itself never needs the key: it reads attestations
 // from SourceRegistry with just the registry address.
 //
-//   npm run attest:remote -- https://bytematch-opal.vercel.app            # dry run
-//   npm run attest:remote -- https://bytematch-opal.vercel.app --send     # attest
+//   npm run attest:remote -- https://bytematch-portaldot.vercel.app            # dry run
+//   npm run attest:remote -- https://bytematch-portaldot.vercel.app --send     # attest
 //
 // One attestation per code hash covers every contract with that code.
 

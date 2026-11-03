@@ -2,6 +2,8 @@
 
 Source verification for contracts on Portaldot V3.
 
+**Live:** https://bytematch-portaldot.vercel.app · **Agents:** `claude mcp add --transport http bytematch https://bytematch-portaldot.vercel.app/mcp` · [`/llms.txt`](https://bytematch-portaldot.vercel.app/llms.txt)
+
 Portaldot V3 runs Solidity through pallet-revive and accepts plain EVM bytecode. Of the
 126 contract code blobs on the V3 testnet when this project started, 125 were EVM
 bytecode compiled with ordinary `solc`; one was PolkaVM. None of them can be checked
@@ -26,6 +28,17 @@ other contracts can read it.
   compiler version and metadata type from the deployed bytecode and searches the
   settings people actually deploy with. Sources that can't match are rejected in about
   a second by checking function selectors against the deployed code.
+- **Verifies a whole repository from its URL.** Paste `github.com/owner/repo`: Bytematch
+  reads the repository (never running its code), finds the Foundry or Hardhat projects
+  in it and their settings, collects every address the repository mentions that has code
+  on chain, and compiles and compares each one. npm dependencies come from the lockfile
+  versions, git submodules from their pinned commits, Foundry remappings are honoured.
+- **Reads verified contracts live.** Every public value, any view function with
+  arguments, and proxies (EIP-1967, beacon, EIP-1167 clones) read through their
+  implementation's verified ABI.
+- **Serves agents as well as people.** An MCP endpoint (`/mcp`) with five tools, and
+  `/llms.txt` describing the whole service in one page.
+- **README badges.** `/badge/<address>.svg` shows the live match state.
 - **Speaks the Etherscan API.** `forge verify-contract` and `hardhat verify` work
   against it without a plugin.
 - **Attests on chain.** `SourceRegistry` records each result under the contract's
@@ -100,6 +113,14 @@ GET /v1/contracts/:address          status (verified | same-code | unverified), 
 GET /v1/contracts/:address/abi
 GET /v1/contracts/:address/files
 GET /v1/contracts/:address/bundle   everything needed to reproduce the verification
+GET /v1/contracts/:address/state    every public value, read live (?abi=<implementation> for proxies)
+POST /v1/contracts/:address/call    { "function": "balanceOf", "args": ["0x…"] }
+POST /v1/repos                      { "url": "https://github.com/owner/repo" }: verify a whole repository
+GET /v1/repos                       every repository checked
+GET /v1/repos/:owner/:repo          its report
+GET /badge/:address.svg             README badge
+POST /mcp                           Model Context Protocol (streamable HTTP)
+GET /llms.txt
 GET /v1/contracts                   recently verified
 GET /v1/network                     every contract on the chain with its status (?status=unverified etc.)
 GET /v1/stats
@@ -173,14 +194,12 @@ the live chain), so `check` sees the same hash the off-chain verifier computes.
 
 ## The site
 
-[`web/`](web) is the frontend: a Vite + React app with a scroll-driven story (GSAP,
-Lenis) and the working pages: contract lookup at `/address/:address` (where Hardhat's
-`browserURL` points), `/verify` and `/network`. It talks to the API on the same origin.
-
-- The hero cards, the byte-by-byte section and the network punch card all use real
-  data: PlaqueLite's deployed bytes and a rebuild under a different path (32 metadata
-  bytes differ), and the live contract list from `/v1/network`, with a bundled
-  snapshot as a fallback.
+[`web/`](web) is the frontend: a Vite + React app. The home page has one field, for an
+address or a repository, and tells the story in four scroll-driven chapters (GSAP,
+Lenis): a 1950 punched card, PlaqueLite's real bytes compared one by one, the Hacker
+House repositories checked so far, and every contract on the chain as a punch card.
+Pages: `/address/:address` (where Hardhat's `browserURL` points; source, live reads,
+proxy target, badge), `/repo/:owner/:repo`, `/repos`, `/verify` and `/network`.
 - Photograph: keypunch operator, 1950 US Census. U.S. Census Bureau, public domain.
 
 ```sh
