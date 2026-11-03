@@ -186,11 +186,20 @@ export function AddressPage() {
             <div>
               <dt>Recorded on chain</dt>
               <dd>
-                {data.onChain && data.onChain.level !== 'none'
-                  ? `Yes, ${data.onChain.level} match in SourceRegistry`
-                  : v.attestationTx
-                    ? 'Yes'
-                    : 'Not yet'}
+                {data.onChain && data.onChain.level !== 'none' ? (
+                  data.onChain.via === 'roots' ? (
+                    <>
+                      Yes, under SourceRoots root <span className="mono">{short(data.onChain.root ?? '', 8, 6)}</span>{' '}
+                      <Copy value={JSON.stringify({ level: data.onChain.level === 'exact' ? 2 : 1, sourceDigest: data.onChain.sourceDigest, proof: data.onChain.proof })} />
+                    </>
+                  ) : (
+                    `Yes, ${data.onChain.level} match in SourceRegistry`
+                  )
+                ) : v.attestationTx ? (
+                  'Yes'
+                ) : (
+                  'Not yet'
+                )}
               </dd>
             </div>
             <div>

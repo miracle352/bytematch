@@ -29,7 +29,7 @@ export interface ContractLookup {
   codeHash: string | null;
   verification: Verification | null;
   abi: AbiItem[] | null;
-  onChain: { level: 'none' | 'partial' | 'exact'; sourceDigest: string } | null;
+  onChain: { level: 'none' | 'partial' | 'exact'; sourceDigest: string; via?: 'registry' | 'roots'; root?: string; proof?: string[] } | null;
   proxy: { kind: 'eip1967' | 'beacon' | 'eip1167'; implementation: string; status: LookupStatus | null; name: string | null; abi: AbiItem[] | null } | null;
 }
 
