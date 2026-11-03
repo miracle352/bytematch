@@ -92,12 +92,15 @@ export class Bytematch {
    */
   async scanRepo(url: string, fetcher: Fetcher = httpFetcher()): Promise<RepoReport> {
     const { report, matches } = await scanRepository(this.chain, url, fetcher, this.log);
-    for (const m of matches) {
-      try {
-        await this.submit({ kind: 'standard-json', address: m.address, input: m.input, contract: m.contract, compilerVersion: m.compilerVersion });
-      } catch (e) {
-        this.log(`${report.repo}: saving ${m.address} failed: ${describeError(e)}`);
-      }
+    // Three at a time: each save also searches the chain for the deploy transaction.
+    for (let i = 0; i < matches.length; i += 3) {
+      await Promise.all(
+        matches.slice(i, i + 3).map((m) =>
+          this.submit({ kind: 'standard-json', address: m.address, input: m.input, contract: m.contract, compilerVersion: m.compilerVersion }).catch(
+            (e) => this.log(`${report.repo}: saving ${m.address} failed: ${describeError(e)}`),
+          ),
+        ),
+      );
     }
     await this.store.cacheSet(`repo:${report.repo.toLowerCase()}`, report, REPO_TTL);
     const index = (await this.store.cacheGet<RepoSummary[]>('repos:index')) ?? [];

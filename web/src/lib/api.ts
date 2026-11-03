@@ -42,6 +42,7 @@ export interface RepoReport {
   scannedAt: string;
   projects: Array<{ root: string; tool: 'foundry' | 'hardhat' | 'plain'; sources: number; compiler: string | null; problem: string | null }>;
   mentioned: number;
+  incomplete?: boolean;
   contracts: Array<{ address: string; size: number; codeHash: string; status: RepoStatus; name: string | null }>;
 }
 

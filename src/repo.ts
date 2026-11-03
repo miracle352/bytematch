@@ -430,6 +430,8 @@ export interface RepoReport {
   scannedAt: string;
   projects: Array<{ root: string; tool: Project['tool']; sources: number; compiler: string | null; problem: string | null }>;
   mentioned: number;
+  /** The settings search hit its time budget; unmatched contracts may match under settings not tried. */
+  incomplete?: boolean;
   contracts: RepoContract[];
 }
 
@@ -466,7 +468,12 @@ export async function scanRepository(
   url: string,
   fetcher: Fetcher = httpFetcher(),
   log: (msg: string) => void = () => {},
+  budgetMs = 190_000,
 ): Promise<{ report: RepoReport; matches: RepoMatch[] }> {
+  // Stop searching settings at the budget and report what was found, so one large
+  // repository can't run past the hosting time limit.
+  const deadline = Date.now() + budgetMs;
+  let outOfTime = false;
   const ref = parseRepoUrl(url);
   const files = untar(await fetcher.tarball(ref));
   log(`${ref.owner}/${ref.repo}: ${files.size} files`);
@@ -490,6 +497,10 @@ export async function scanRepository(
   const projectsOut: RepoReport['projects'] = [];
 
   for (const project of findProjects(files)) {
+    if (Date.now() > deadline) {
+      outOfTime = true;
+      break;
+    }
     const resolver = new SourceResolver(files, project, ref, fetcher);
     const entries = entryFiles(files, project);
     const { sources, missing } = await resolver.collect(entries);
@@ -514,6 +525,7 @@ export async function scanRepository(
     }
 
     for (const [key, group] of groups) {
+      if (outOfTime) break;
       const version = key.split('|')[0]!;
       let longVersion: string;
       try {
@@ -529,6 +541,10 @@ export async function scanRepository(
       for (const settings of settingsVariants(project, version, aux)) {
         const left = group.filter((c) => results.get(c.address)!.status === 'no_match');
         if (!left.length || triesAfterHit-- <= 0) break;
+        if (Date.now() > deadline) {
+          outOfTime = true;
+          break;
+        }
         const input: StandardJsonInput = {
           language: 'Solidity',
           sources,
@@ -572,6 +588,7 @@ export async function scanRepository(
     scannedAt: new Date().toISOString(),
     projects: projectsOut,
     mentioned: mentioned.length,
+    ...(outOfTime ? { incomplete: true } : {}),
     contracts: [...results.values()].sort((a, b) => Number(b.status !== 'no_match') - Number(a.status !== 'no_match')),
   };
   log(`${matches.length} matched`);

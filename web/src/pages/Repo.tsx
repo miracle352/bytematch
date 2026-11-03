@@ -146,6 +146,7 @@ export function RepoPage() {
           </p>
         )}
         <p className="rp-when">
+          {report.incomplete && 'Stopped at the time limit; not every setting was tried. '}
           Checked {ago(report.scannedAt)} ·{' '}
           <button className="rp-again" onClick={scan} disabled={scanning}>
             {scanning ? `checking… ${elapsed}s` : 'check again'}
