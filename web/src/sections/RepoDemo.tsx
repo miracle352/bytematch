@@ -109,10 +109,23 @@ export function RepoDemo() {
                 );
               })}
             </ul>
-            <p className={`rd-total ${step >= 3 ? 'is-on' : ''}`}>
-              <span className="mono">{exact}</span> of <span className="mono">{rows.length}</span> exact, from one URL.{' '}
-              <Link to={`/repo/${report?.repo ?? DEMO}`}>Open</Link>
-            </p>
+            <div className={`rd-total ${step >= 3 ? 'is-on' : ''}`}>
+              <p className="rd-score">
+                <span className="mono">
+                  {exact}
+                  <small>/{rows.length}</small>
+                </span>
+                exact
+              </p>
+              <ol className="rd-cells" aria-hidden="true">
+                {rows.map((c, i) => (
+                  <li key={c.address} className={i < resolved ? `is-${c.status}` : ''} />
+                ))}
+              </ol>
+              <Link to={`/repo/${report?.repo ?? DEMO}`} className="btn rd-open">
+                Open the report
+              </Link>
+            </div>
           </div>
         </div>
 
